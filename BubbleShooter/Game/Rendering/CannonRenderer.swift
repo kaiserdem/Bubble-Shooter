@@ -49,6 +49,7 @@ final class CannonRenderer: SKNode {
         self.launchBubbleOffsetY = Self.gunVerticalOffset
             + gunHeight * Self.diamondCenterRatio
             + Self.bubbleVerticalOffset
+            + CosmeticSettings.cannonSkin.loadedBubbleYOffset
 
         gunNode = SKSpriteNode(texture: texture, size: CGSize(width: gunWidth, height: gunHeight))
         gunNode.anchorPoint = CGPoint(x: 0.5, y: 0)
