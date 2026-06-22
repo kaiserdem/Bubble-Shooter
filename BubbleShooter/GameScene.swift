@@ -130,12 +130,18 @@ private extension GameScene {
         }
     }
 
-    func updateHUD(grid: BubbleGrid, parameters: MatchGameplayParameters) {
+    func updateHUD(
+        grid: BubbleGrid,
+        parameters: MatchGameplayParameters,
+        lastPopCount: Int? = nil
+    ) {
         hudLabel?.removeFromParent()
 
         let seed = matchContext?.matchSeed ?? "—"
+        let popText = lastPopCount.map { "pop ×\($0)! · " } ?? ""
+        let effectText = "\(BubblePopEffectPlayer.style.displayName) · "
         let label = SKLabelNode(fontNamed: Theme.Typography.skBody())
-        label.text = "\(grid.occupiedPositions.count) bubbles · aim & shoot · seed: \(seed)"
+        label.text = "\(popText)\(effectText)\(grid.occupiedPositions.count) bubbles · aim & shoot · seed: \(seed)"
         label.fontSize = 13
         label.fontColor = Theme.SK.textPrimary.withAlphaComponent(0.75)
         label.position = CGPoint(x: 0, y: -size.height / 2 + 48)
@@ -273,9 +279,13 @@ private extension GameScene {
         ) {
             do {
                 try grid.place(shotBubble, at: snapPosition)
-                self.grid = grid
-                gridRenderer?.render(grid: grid)
-                updateHUD(grid: grid, parameters: parameters)
+                resolveMatches(
+                    at: snapPosition,
+                    grid: &grid,
+                    layout: layout,
+                    configuration: configuration,
+                    parameters: parameters
+                )
             } catch {
                 // Keep playing even if placement fails unexpectedly.
             }
@@ -287,6 +297,41 @@ private extension GameScene {
             cannonRenderer?.update(current: queue.current, next: queue.next)
             cannonRenderer?.showCurrentBubble()
         }
+    }
+
+    func resolveMatches(
+        at position: GridPosition,
+        grid: inout BubbleGrid,
+        layout: HexLayout,
+        configuration: GridConfiguration,
+        parameters: MatchGameplayParameters
+    ) {
+        var popCount: Int?
+
+        if let group = MatchFinder.matchingGroup(including: position, in: grid) {
+            popCount = group.count
+            let specs = group.compactMap { gridPosition -> BubblePopSpec? in
+                guard let bubble = grid.bubble(at: gridPosition) else { return nil }
+                return BubblePopSpec(
+                    center: layout.center(for: gridPosition, configuration: configuration),
+                    color: bubble.color
+                )
+            }
+
+            for gridPosition in group {
+                try? grid.remove(at: gridPosition)
+            }
+
+            BubblePopEffectPlayer.playGroup(
+                specs,
+                bubbleDiameter: layout.bubbleVisualDiameter,
+                in: self
+            )
+        }
+
+        self.grid = grid
+        gridRenderer?.render(grid: grid)
+        updateHUD(grid: grid, parameters: parameters, lastPopCount: popCount)
     }
 
     func simulatedPath(

@@ -69,6 +69,19 @@ final class SandboxLobbyView: UIView {
         let testButton = ArcadeButton(title: "Determinism Test", style: .secondary)
         testButton.addAction(UIAction { [weak self] _ in self?.onStartDeterminismTest?() }, for: .touchUpInside)
 
+        let popEffectLabel = ArcadeLabel("Pop effect", style: .caption)
+        let popEffectControl = UISegmentedControl(
+            items: BubblePopEffectStyle.allCases.map(\.displayName)
+        )
+        popEffectControl.selectedSegmentIndex = BubblePopEffectStyle.allCases.firstIndex(
+            of: BubblePopEffectPlayer.style
+        ) ?? 0
+        popEffectControl.addAction(UIAction { _ in
+            let index = popEffectControl.selectedSegmentIndex
+            guard index >= 0, index < BubblePopEffectStyle.allCases.count else { return }
+            BubblePopEffectPlayer.style = BubblePopEffectStyle.allCases[index]
+        }, for: .valueChanged)
+
         let designButton = ArcadeButton(title: "Design Preview", style: .ghost)
         designButton.addAction(UIAction { [weak self] _ in self?.onOpenDesignPreview?() }, for: .touchUpInside)
 
@@ -79,6 +92,8 @@ final class SandboxLobbyView: UIView {
         stackView.addArrangedSubview(launchButton)
         stackView.addArrangedSubview(matchButton)
         stackView.addArrangedSubview(testButton)
+        stackView.addArrangedSubview(popEffectLabel)
+        stackView.addArrangedSubview(popEffectControl)
         stackView.addArrangedSubview(designButton)
 
         card.contentView.addSubview(stackView)
@@ -90,6 +105,7 @@ final class SandboxLobbyView: UIView {
             launchButton.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             matchButton.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             testButton.widthAnchor.constraint(equalTo: stackView.widthAnchor),
+            popEffectControl.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             designButton.widthAnchor.constraint(equalTo: stackView.widthAnchor),
         ])
     }
