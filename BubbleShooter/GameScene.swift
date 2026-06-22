@@ -215,7 +215,7 @@ private extension GameScene {
         pendingShotPath = path
 
         let shotBubble = shotQueue.current
-        cannonPivot?.cannon.hideCurrentBubble()
+        cannonPivot?.cannon.beginShot()
 
         flyingBubble = FlyingBubbleNode.animate(
             bubble: shotBubble,
@@ -297,8 +297,7 @@ private extension GameScene {
         if var queue = shotQueue, let random {
             queue.advance(random: random, colorCount: colorCount)
             shotQueue = queue
-            cannonPivot?.cannon.update(current: queue.current, next: queue.next)
-            cannonPivot?.cannon.showCurrentBubble()
+            cannonPivot?.cannon.replenishAfterShot(next: queue.next)
         }
     }
 
