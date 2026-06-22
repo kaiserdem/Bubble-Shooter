@@ -13,6 +13,8 @@ final class ImageBackgroundView: UIView {
     init(named imageName: String) {
         super.init(frame: .zero)
         isUserInteractionEnabled = false
+        isOpaque = false
+        backgroundColor = .clear
         imageView.image = UIImage(named: imageName)
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true

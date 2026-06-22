@@ -9,6 +9,8 @@ import SpriteKit
 /// Bordered playfield frame — bubbles on top, cannon at bottom inside `gameView`.
 final class GameFieldContainerView: UIView {
 
+    private let backgroundView = ImageBackgroundView(named: Theme.Asset.Background.game)
+
     let gameView: SKView = {
         let view = SKView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -18,6 +20,7 @@ final class GameFieldContainerView: UIView {
         view.allowsTransparency = true
         view.backgroundColor = .clear
         view.isOpaque = false
+        view.layer.isOpaque = false
         view.showsFPS = false
         view.showsNodeCount = false
         return view
@@ -44,6 +47,7 @@ final class GameFieldContainerView: UIView {
     // MARK: - Private
 
     private func configure() {
+        isOpaque = false
         backgroundColor = .clear
         clipsToBounds = true
         layer.cornerRadius = Theme.Metrics.cornerRadiusMedium
@@ -57,8 +61,15 @@ final class GameFieldContainerView: UIView {
         borderGlowLayer.backgroundColor = UIColor.clear.cgColor
         layer.insertSublayer(borderGlowLayer, at: 0)
 
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(backgroundView)
         addSubview(gameView)
         NSLayoutConstraint.activate([
+            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            backgroundView.topAnchor.constraint(equalTo: topAnchor),
+            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
             gameView.leadingAnchor.constraint(equalTo: leadingAnchor),
             gameView.trailingAnchor.constraint(equalTo: trailingAnchor),
             gameView.topAnchor.constraint(equalTo: topAnchor),

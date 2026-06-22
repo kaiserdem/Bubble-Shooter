@@ -33,6 +33,8 @@ final class MatchLayoutView: UIView {
     // MARK: - Private
 
     private func configure() {
+        isOpaque = false
+        backgroundColor = .clear
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         hudView.translatesAutoresizingMaskIntoConstraints = false
         gameFieldContainer.translatesAutoresizingMaskIntoConstraints = false
