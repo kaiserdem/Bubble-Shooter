@@ -8,6 +8,7 @@ import UIKit
 /// Compact stats bar above the playfield — score, next bubble, timer.
 final class GameHUDView: UIView {
 
+    private let glassPanel = GlassPanelView()
     private let scoreCaptionLabel = ArcadeLabel("SCORE", style: .caption)
     private let scoreValueLabel = ArcadeLabel("0", style: .title)
     private let nextCaptionLabel = ArcadeLabel("NEXT", style: .caption)
@@ -33,12 +34,14 @@ final class GameHUDView: UIView {
 
     func update(with state: MatchHUDState) {
         scoreValueLabel.text = scoreFormatter.string(from: NSNumber(value: state.score)) ?? "\(state.score)"
-        scoreValueLabel.textColor = state.score >= 10_000 ? Theme.Accent.gold : Theme.Text.primary
+        let scoreColor = state.score >= 10_000 ? Theme.Accent.gold : Theme.Text.onDark
+        Theme.Text.applyHUDLegibility(to: scoreValueLabel, color: scoreColor)
 
         timerValueLabel.text = Self.formatTime(state.timeRemainingSeconds)
-        timerValueLabel.textColor = state.timeRemainingSeconds <= 10
+        let timerColor = state.timeRemainingSeconds <= 10
             ? Theme.Accent.danger
-            : Theme.Text.primary
+            : Theme.Text.onDark
+        Theme.Text.applyHUDLegibility(to: timerValueLabel, color: timerColor)
 
         nextBubbleImageView.image = UIImage(named: state.nextBubble.spriteName)
     }
@@ -47,10 +50,20 @@ final class GameHUDView: UIView {
 
     private func configure() {
         isUserInteractionEnabled = true
-        backgroundColor = Theme.Background.elevated.withAlphaComponent(0.55)
-        layer.cornerRadius = Theme.Metrics.cornerRadiusMedium
-        layer.borderWidth = Theme.Metrics.borderWidth
-        layer.borderColor = Theme.Surface.borderSubtle.cgColor
+        isOpaque = false
+        backgroundColor = .clear
+
+        glassPanel.translatesAutoresizingMaskIntoConstraints = false
+        glassPanel.cornerRadius = Theme.Metrics.cornerRadiusMedium
+
+        let hudLabels: [ArcadeLabel] = [
+            scoreCaptionLabel, scoreValueLabel,
+            nextCaptionLabel,
+            timerCaptionLabel, timerValueLabel,
+        ]
+        for label in hudLabels {
+            Theme.Text.applyHUDLegibility(to: label)
+        }
 
         scoreCaptionLabel.textAlignment = .left
         scoreValueLabel.textAlignment = .left
@@ -84,9 +97,15 @@ final class GameHUDView: UIView {
         statsRow.distribution = .fillEqually
         statsRow.translatesAutoresizingMaskIntoConstraints = false
 
+        addSubview(glassPanel)
         addSubview(statsRow)
 
         NSLayoutConstraint.activate([
+            glassPanel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            glassPanel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            glassPanel.topAnchor.constraint(equalTo: topAnchor),
+            glassPanel.bottomAnchor.constraint(equalTo: bottomAnchor),
+
             statsRow.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Theme.Metrics.contentPadding),
             statsRow.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Theme.Metrics.contentPadding),
             statsRow.topAnchor.constraint(equalTo: topAnchor, constant: Theme.Metrics.spacingMedium),

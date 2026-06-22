@@ -56,6 +56,13 @@ enum Theme {
         static let primary = UIColor(hex: 0xEAF0FF)
         static let secondary = UIColor(hex: 0xA8B8D8)
         static let muted = UIColor(hex: 0x7A8AAA)
+
+        /// White HUD text with a dark drop shadow for legibility on glass backgrounds.
+        static func applyHUDLegibility(to label: UILabel, color: UIColor = onDark) {
+            label.textColor = color
+            label.shadowColor = UIColor.black.withAlphaComponent(0.82)
+            label.shadowOffset = CGSize(width: 0, height: 1)
+        }
     }
 
     // MARK: - Surfaces (glass)

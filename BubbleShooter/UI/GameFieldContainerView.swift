@@ -6,10 +6,10 @@
 import UIKit
 import SpriteKit
 
-/// Bordered playfield frame — bubbles on top, cannon at bottom inside `gameView`.
+/// Bordered playfield frame — frosted glass over the match wallpaper, bubbles in `gameView`.
 final class GameFieldContainerView: UIView {
 
-    private let backgroundView = ImageBackgroundView(named: Theme.Asset.Background.game)
+    private let glassPanel = GlassPanelView()
 
     let gameView: SKView = {
         let view = SKView()
@@ -49,10 +49,14 @@ final class GameFieldContainerView: UIView {
     private func configure() {
         isOpaque = false
         backgroundColor = .clear
-        clipsToBounds = true
+        clipsToBounds = false
         layer.cornerRadius = Theme.Metrics.cornerRadiusMedium
         layer.borderWidth = Theme.Metrics.borderWidthGlow
         layer.borderColor = Theme.Surface.border.cgColor
+
+        glassPanel.translatesAutoresizingMaskIntoConstraints = false
+        glassPanel.cornerRadius = Theme.Metrics.cornerRadiusMedium
+        glassPanel.clipsToBounds = true
 
         borderGlowLayer.shadowColor = Theme.Accent.primaryGlow.cgColor
         borderGlowLayer.shadowOpacity = 0.35
@@ -61,14 +65,13 @@ final class GameFieldContainerView: UIView {
         borderGlowLayer.backgroundColor = UIColor.clear.cgColor
         layer.insertSublayer(borderGlowLayer, at: 0)
 
-        backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(backgroundView)
+        addSubview(glassPanel)
         addSubview(gameView)
         NSLayoutConstraint.activate([
-            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            backgroundView.topAnchor.constraint(equalTo: topAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            glassPanel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            glassPanel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            glassPanel.topAnchor.constraint(equalTo: topAnchor),
+            glassPanel.bottomAnchor.constraint(equalTo: bottomAnchor),
 
             gameView.leadingAnchor.constraint(equalTo: leadingAnchor),
             gameView.trailingAnchor.constraint(equalTo: trailingAnchor),

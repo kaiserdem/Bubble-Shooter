@@ -32,7 +32,6 @@ final class GameScene: SKScene {
     private var isShooting = false
     private var flyingBubble: BubbleNode?
     private var pendingShotPath: ShotPath?
-    private var sceneBackgroundNode: SKSpriteNode?
 
     // MARK: - Configuration
 
@@ -63,7 +62,6 @@ final class GameScene: SKScene {
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
         isLayoutReady = true
         BubbleTextureCache.preload()
-        applySceneBackground()
         applyLayout()
     }
 
@@ -83,32 +81,7 @@ final class GameScene: SKScene {
 
 private extension GameScene {
 
-    func applySceneBackground() {
-        guard size.width > 1, size.height > 1 else { return }
-
-        sceneBackgroundNode?.removeFromParent()
-
-        let texture = SKTexture(imageNamed: Theme.Asset.Background.game)
-        guard texture.size() != .zero else { return }
-
-        let node = SKSpriteNode(texture: texture)
-        node.zPosition = -10_000
-        node.position = .zero
-
-        let textureAspect = texture.size().width / texture.size().height
-        let sceneAspect = size.width / size.height
-        if textureAspect > sceneAspect {
-            node.size = CGSize(width: size.height * textureAspect, height: size.height)
-        } else {
-            node.size = CGSize(width: size.width, height: size.width / textureAspect)
-        }
-
-        addChild(node)
-        sceneBackgroundNode = node
-    }
-
     func applyLayout() {
-        applySceneBackground()
         guard let grid, let gameplayParameters, size.width > 1, size.height > 1 else { return }
 
         gridRenderer?.container.removeFromParent()
