@@ -27,11 +27,26 @@ enum BubbleColor: Int, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// Pop animation frames in `Assets.xcassets/Expression/`, when available.
-    var explosionFrameNames: [String]? {
+    /// Pop animation frames in `Assets.xcassets/Expression/`.
+    var explosionFrameNames: [String] {
         switch self {
-        case .ruby: ["Ruby-explosion-1", "Ruby-explosion-2"]
-        default: nil
+        case .amber:
+            return ["Amber-explosion-1", "Amber- explosion-2"]
+        default:
+            let name = assetColorName
+            return ["\(name)-explosion-1", "\(name)-explosion-2"]
+        }
+    }
+
+    /// Prefix used by bubble and explosion assets (`Ruby`, `Amber`, …).
+    var assetColorName: String {
+        switch self {
+        case .ruby: "Ruby"
+        case .amber: "Amber"
+        case .lime: "Lime"
+        case .aqua: "Aqua"
+        case .violet: "Violet"
+        case .rose: "Rose"
         }
     }
 

@@ -18,11 +18,7 @@ enum BubbleExplosionTextureCache {
             return cached.isEmpty ? nil : cached
         }
 
-        guard let names = color.explosionFrameNames else {
-            frameCache[color] = []
-            return nil
-        }
-
+        let names = color.explosionFrameNames
         let textures = names.map { SKTexture(imageNamed: $0) }.filter { $0.size() != .zero }
         frameCache[color] = textures
         return textures.count == names.count ? textures : nil

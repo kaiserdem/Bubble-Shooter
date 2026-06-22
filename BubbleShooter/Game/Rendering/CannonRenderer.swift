@@ -13,7 +13,7 @@ final class CannonRenderer: SKNode {
     private static let diamondCenterRatio: CGFloat = 0.82
     private static let gunWidthRatio: CGFloat = 2.35 * 1.6 * 1.1
     private static let gunVerticalOffset: CGFloat = -40
-    private static let bubbleVerticalOffset: CGFloat = -65
+    private static let bubbleVerticalOffset: CGFloat = -35
 
     private let gunNode: SKSpriteNode
     private let bubbleDiameter: CGFloat
