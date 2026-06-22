@@ -279,13 +279,25 @@ private extension GameScene {
 
         let configuration = parameters.gridConfiguration
 
-        if let snapPosition = SnapResolver.resolve(
+        let snapAnalysis = SnapResolver.analyze(
             hit: path.hit,
             shotBubble: shotBubble,
             grid: grid,
             layout: layout,
             configuration: configuration
-        ) {
+        )
+
+        #if DEBUG
+        GridDebugPrinter.logShot(
+            hit: path.hit,
+            shotBubble: shotBubble,
+            grid: grid,
+            configuration: configuration,
+            analysis: snapAnalysis
+        )
+        #endif
+
+        if let snapPosition = snapAnalysis.chosen {
             do {
                 try grid.place(shotBubble, at: snapPosition)
                 resolveMatches(
@@ -316,7 +328,18 @@ private extension GameScene {
     ) {
         var popCount: Int?
 
-        if let group = MatchFinder.matchingGroup(including: position, in: grid) {
+        let matchGroup = MatchFinder.matchingGroup(including: position, in: grid)
+
+        #if DEBUG
+        GridDebugPrinter.logMatchResult(
+            at: position,
+            grid: grid,
+            configuration: configuration,
+            group: matchGroup
+        )
+        #endif
+
+        if let group = matchGroup {
             popCount = group.count
             let specs = group.compactMap { gridPosition -> BubblePopSpec? in
                 guard let bubble = grid.bubble(at: gridPosition) else { return nil }

@@ -42,9 +42,10 @@ struct BubbleGrid: Equatable, Sendable {
 
         let deltas: [(Int, Int)]
         if position.row.isMultiple(of: 2) {
-            deltas = [(0, -1), (1, -1), (-1, 0), (1, 0), (0, 1), (1, 1)]
+            // Odd-r layout: even rows (matches `HexLayout` honeycomb).
+            deltas = [(-1, -1), (-1, 0), (0, -1), (0, 1), (1, -1), (1, 0)]
         } else {
-            deltas = [(-1, -1), (0, -1), (-1, 0), (1, 0), (-1, 1), (0, 1)]
+            deltas = [(-1, 0), (-1, 1), (0, -1), (0, 1), (1, 0), (1, 1)]
         }
 
         return deltas.compactMap { dRow, dCol in

@@ -8,6 +8,24 @@ import CoreGraphics
 /// Picks the hex cell where a shot bubble should attach after impact.
 enum SnapResolver {
 
+    struct Analysis: Sendable {
+        struct Candidate: Sendable {
+            let position: GridPosition
+            let connectionScore: Int
+            let distanceToImpact: CGFloat
+
+            static func sortForDisplay(_ lhs: Candidate, _ rhs: Candidate) -> Bool {
+                if lhs.connectionScore != rhs.connectionScore {
+                    return lhs.connectionScore > rhs.connectionScore
+                }
+                return lhs.distanceToImpact < rhs.distanceToImpact
+            }
+        }
+
+        let chosen: GridPosition?
+        let candidates: [Candidate]
+    }
+
     static func resolve(
         hit: ShotHit,
         shotBubble: Bubble,
@@ -15,41 +33,67 @@ enum SnapResolver {
         layout: HexLayout,
         configuration: GridConfiguration
     ) -> GridPosition? {
-        switch hit.target {
-        case .bubble(let hitPosition):
-            return snapNearBubble(
-                hitPosition: hitPosition,
-                impactPoint: hit.point,
-                shotBubble: shotBubble,
-                grid: grid,
-                layout: layout,
-                configuration: configuration
-            )
-
-        case .ceiling:
-            return snapToCeiling(
-                impactPoint: hit.point,
-                shotBubble: shotBubble,
-                grid: grid,
-                layout: layout,
-                configuration: configuration
-            )
-
-        case .leftWall, .rightWall:
-            return nil
-        }
+        analyze(
+            hit: hit,
+            shotBubble: shotBubble,
+            grid: grid,
+            layout: layout,
+            configuration: configuration
+        ).chosen
     }
 
-    // MARK: - Private
-
-    private static func snapNearBubble(
-        hitPosition: GridPosition,
-        impactPoint: CGPoint,
+    static func analyze(
+        hit: ShotHit,
         shotBubble: Bubble,
         grid: BubbleGrid,
         layout: HexLayout,
         configuration: GridConfiguration
-    ) -> GridPosition? {
+    ) -> Analysis {
+        let impactPoint = hit.point
+        let candidatePositions: [GridPosition]
+
+        switch hit.target {
+        case .bubble(let hitPosition):
+            candidatePositions = candidateCellsNearBubble(
+                hitPosition: hitPosition,
+                grid: grid
+            )
+
+        case .ceiling:
+            candidatePositions = candidateCellsForCeiling(
+                grid: grid,
+                configuration: configuration
+            )
+
+        case .leftWall, .rightWall:
+            return Analysis(chosen: nil, candidates: [])
+        }
+
+        let candidates = scoreCandidates(
+            candidatePositions,
+            impactPoint: impactPoint,
+            shotBubble: shotBubble,
+            grid: grid,
+            layout: layout,
+            configuration: configuration
+        )
+
+        let chosen = candidates.max { lhs, rhs in
+            if lhs.connectionScore != rhs.connectionScore {
+                return lhs.connectionScore < rhs.connectionScore
+            }
+            return lhs.distanceToImpact > rhs.distanceToImpact
+        }?.position
+
+        return Analysis(chosen: chosen, candidates: candidates)
+    }
+
+    // MARK: - Private
+
+    private static func candidateCellsNearBubble(
+        hitPosition: GridPosition,
+        grid: BubbleGrid
+    ) -> [GridPosition] {
         var candidates = emptyNeighbors(around: hitPosition, grid: grid)
 
         if candidates.isEmpty {
@@ -60,23 +104,13 @@ enum SnapResolver {
             candidates = Array(Set(candidates))
         }
 
-        return bestSnapPosition(
-            among: candidates,
-            impactPoint: impactPoint,
-            shotBubble: shotBubble,
-            grid: grid,
-            layout: layout,
-            configuration: configuration
-        )
+        return candidates
     }
 
-    private static func snapToCeiling(
-        impactPoint: CGPoint,
-        shotBubble: Bubble,
+    private static func candidateCellsForCeiling(
         grid: BubbleGrid,
-        layout: HexLayout,
         configuration: GridConfiguration
-    ) -> GridPosition? {
+    ) -> [GridPosition] {
         var candidates: [GridPosition] = []
         for position in grid.occupiedPositions {
             candidates.append(contentsOf: emptyNeighbors(around: position, grid: grid))
@@ -89,44 +123,25 @@ enum SnapResolver {
             candidates = (0..<columnCount).map { GridPosition(row: row, col: $0) }
         }
 
-        return bestSnapPosition(
-            among: candidates,
-            impactPoint: impactPoint,
-            shotBubble: shotBubble,
-            grid: grid,
-            layout: layout,
-            configuration: configuration
-        )
+        return candidates
     }
 
-    private static func bestSnapPosition(
-        among candidates: [GridPosition],
+    private static func scoreCandidates(
+        _ candidates: [GridPosition],
         impactPoint: CGPoint,
         shotBubble: Bubble,
         grid: BubbleGrid,
         layout: HexLayout,
         configuration: GridConfiguration
-    ) -> GridPosition? {
-        guard !candidates.isEmpty else { return nil }
-
-        return candidates.max { lhs, rhs in
-            let leftScore = connectionScore(
-                at: lhs,
-                shotBubble: shotBubble,
-                grid: grid
+    ) -> [Analysis.Candidate] {
+        candidates.map { position in
+            let center = layout.center(for: position, configuration: configuration)
+            let distance = hypot(center.x - impactPoint.x, center.y - impactPoint.y)
+            return Analysis.Candidate(
+                position: position,
+                connectionScore: connectionScore(at: position, shotBubble: shotBubble, grid: grid),
+                distanceToImpact: distance
             )
-            let rightScore = connectionScore(
-                at: rhs,
-                shotBubble: shotBubble,
-                grid: grid
-            )
-            if leftScore != rightScore { return leftScore < rightScore }
-
-            let leftCenter = layout.center(for: lhs, configuration: configuration)
-            let rightCenter = layout.center(for: rhs, configuration: configuration)
-            let leftDistance = hypot(leftCenter.x - impactPoint.x, leftCenter.y - impactPoint.y)
-            let rightDistance = hypot(rightCenter.x - impactPoint.x, rightCenter.y - impactPoint.y)
-            return leftDistance > rightDistance
         }
     }
 
