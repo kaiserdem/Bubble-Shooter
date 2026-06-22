@@ -180,13 +180,7 @@ private extension GameScene {
             grid: grid,
             configuration: configuration
         )
-        let previewPath = animationPath(
-            for: path,
-            shotBubble: shotQueue.current,
-            grid: grid,
-            layout: layout,
-            configuration: configuration
-        )
+        let previewPath = path
         cannonPivot?.updateAimGuide(path: previewPath, in: self)
     }
 
@@ -206,13 +200,7 @@ private extension GameScene {
             configuration: configuration
         )
         let shotBubble = shotQueue.current
-        let animationPath = animationPath(
-            for: path,
-            shotBubble: shotBubble,
-            grid: grid,
-            layout: layout,
-            configuration: configuration
-        )
+        let flightPath = visualFlightPath(from: path, layout: layout)
 
         isShooting = true
         cannonPivot?.hideAimGuide()
@@ -223,7 +211,7 @@ private extension GameScene {
         flyingBubble = FlyingBubbleNode.animate(
             bubble: shotBubble,
             diameter: layout.bubbleVisualDiameter,
-            along: animationPath,
+            along: flightPath,
             in: self
         ) { [weak self] in
             guard let self else { return }
@@ -232,33 +220,6 @@ private extension GameScene {
                 colorCount: gameplayParameters.colorCount
             )
         }
-    }
-
-    func animationPath(
-        for path: ShotPath,
-        shotBubble: Bubble,
-        grid: BubbleGrid,
-        layout: HexLayout,
-        configuration: GridConfiguration
-    ) -> ShotPath {
-        guard let snapPosition = SnapResolver.resolve(
-            hit: path.hit,
-            shotBubble: shotBubble,
-            grid: grid,
-            layout: layout,
-            configuration: configuration
-        ) else {
-            return path
-        }
-
-        var points = path.points
-        let snapCenter = layout.center(for: snapPosition, configuration: configuration)
-        if points.isEmpty {
-            points = [snapCenter]
-        } else {
-            points[points.count - 1] = snapCenter
-        }
-        return ShotPath(points: points, hit: path.hit)
     }
 
     func finishShot(
@@ -379,8 +340,39 @@ private extension GameScene {
                 layout: layout,
                 configuration: configuration
             ),
-            bubbleRadius: layout.bubbleVisualDiameter / 2
+            bubbleRadius: layout.bubbleCollisionRadius
         )
+    }
+
+    /// Pulls the flight endpoint back so the sprite touches the target, not the inflated raycast shell.
+    func visualFlightPath(from path: ShotPath, layout: HexLayout) -> ShotPath {
+        guard path.points.count >= 2 else { return path }
+
+        switch path.hit.target {
+        case .bubble:
+            break
+        case .ceiling, .leftWall, .rightWall:
+            return path
+        }
+
+        var points = path.points
+        let before = points[points.count - 2]
+        let hit = points[points.count - 1]
+        let dx = hit.x - before.x
+        let dy = hit.y - before.y
+        let length = hypot(dx, dy)
+        guard length > 0 else { return path }
+
+        let collisionReach = layout.bubbleCollisionRadius * 2 + 1
+        let visualReach = layout.bubbleVisualDiameter
+        let pullBack = max(0, collisionReach - visualReach)
+        guard pullBack > 0 else { return path }
+
+        points[points.count - 1] = CGPoint(
+            x: hit.x - dx / length * pullBack,
+            y: hit.y - dy / length * pullBack
+        )
+        return ShotPath(points: points, hit: path.hit)
     }
 }
 

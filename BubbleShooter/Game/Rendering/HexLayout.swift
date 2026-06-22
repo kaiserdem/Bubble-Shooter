@@ -14,6 +14,8 @@ struct HexLayout: Equatable, Sendable {
     let horizontalPitch: CGFloat
     /// Rendered bubble diameter.
     let bubbleVisualDiameter: CGFloat
+    /// Raycast radius — slightly larger than sprite so shots cannot thread visible gaps.
+    let bubbleCollisionRadius: CGFloat
     let topCenter: CGPoint
 
     private let rowStep: CGFloat
@@ -31,6 +33,10 @@ struct HexLayout: Equatable, Sendable {
         horizontalPitch = pitch - Self.spacingTighten
         rowStep = pitch * Self.hexRowStepRatio - Self.spacingTighten
         bubbleVisualDiameter = floor(horizontalPitch * Self.visualDiameterRatio) + Self.spacingTighten
+        bubbleCollisionRadius = max(
+            bubbleVisualDiameter / 2,
+            gridPitch / 2 - 0.5
+        )
         topCenter = CGPoint(x: 0, y: sceneSize.height / 2 - topPadding)
     }
 

@@ -26,8 +26,8 @@ enum ShotSimulator {
 
     static let maxWallBounces = 10
     private static let epsilon: CGFloat = 0.5
-    /// Extra reach so grazing shots still register bubble contact.
-    private static let collisionSlop: CGFloat = 3
+    /// Small tolerance for grazing contacts after collision radius is inflated in `HexLayout`.
+    private static let collisionSlop: CGFloat = 1
 
     static func simulate(
         ray: ShotRay,
