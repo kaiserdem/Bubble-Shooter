@@ -4,13 +4,10 @@
 
 ## Active
 
-- [ ] **Крок 2**: Hex grid model (`BubbleColor`, `GridPosition`, `BubbleGrid`)
+- [ ] **Крок 5**: AimController, ShotSimulator, FlyingBubble
 
 ## Backlog
 
-- [ ] Крок 3: LevelGenerator
-- [ ] Крок 4: Rendering
-- [ ] Крок 5: Shooting
 - [ ] Крок 6: Snap
 - [ ] Крок 7: Match + Drop
 - [ ] Крок 8: Game loop + timer
@@ -21,4 +18,7 @@
 ## Done
 
 - [x] Крок 1: Foundation (2026-06-22)
+- [x] Крок 2: Hex grid model (2026-06-22)
+- [x] Крок 3: LevelGenerator (2026-06-22)
+- [x] Крок 4: Rendering + Collection1 sprites (2026-06-22)
 - [x] Design: Cosmic Pop UI kit (Theme, ArcadeButton, GlassCard)

@@ -48,11 +48,15 @@ extension GameViewController: SkillzGameDelegate {
 
     func tournamentWillBegin(matchContext: SkillzMatchContext) {
         hideSandboxLobby()
-        presentGameScene(with: matchContext)
+        DispatchQueue.main.async { [weak self] in
+            self?.presentGameScene(with: matchContext)
+        }
     }
 
     func skillzWillExit() {
-        gameScene?.removeFromParent()
+        if let skView = view as? SKView {
+            skView.presentScene(nil)
+        }
         gameScene = nil
         showSandboxLobbyIfNeeded()
     }
@@ -97,8 +101,12 @@ private extension GameViewController {
     func presentGameScene(with matchContext: SkillzMatchContext) {
         guard let skView = view as? SKView else { return }
 
-        let scene = GameScene(size: skView.bounds.size)
-        scene.scaleMode = .aspectFill
+        view.layoutIfNeeded()
+        let sceneSize = skView.bounds.size
+        guard sceneSize.width > 1, sceneSize.height > 1 else { return }
+
+        let scene = GameScene(size: sceneSize)
+        scene.scaleMode = .resizeFill
         scene.configure(with: matchContext)
 
         gameScene = scene

@@ -119,20 +119,20 @@ BubbleShooter/
 
 ### Крок 2 — Модель сітки
 
-- [ ] `BubbleColor`, `Bubble`, `GridPosition`
-- [ ] `BubbleGrid`: hex сусіди, place/remove, bounds
+- [x] `BubbleColor`, `Bubble`, `GridPosition`
+- [x] `BubbleGrid`: hex сусіди, place/remove, bounds
 - [ ] Unit-тести: сусідство, place, occupied
 
 ### Крок 3 — Генерація рівня
 
-- [ ] `LevelGenerator.generate(seed:rows:colorCount:)` — лише через RNG
+- [x] `LevelGenerator.generate(seed:rows:colorCount:)` — лише через RNG
 - [ ] Тест: однаковий seed → однакова дошка
 
 ### Крок 4 — Рендеринг
 
-- [ ] `BubbleNode` (SKShapeNode або SKSpriteNode)
-- [ ] `GridRenderer`: позиціонування hex на екрані
-- [ ] Відображення стартової дошки в `GameScene`
+- [x] `BubbleNode` (SKSpriteNode з Collection1)
+- [x] `GridRenderer`: позиціонування hex на екрані
+- [x] Відображення стартової дошки в `GameScene`
 
 ### Крок 5 — Прицілювання та постріл
 

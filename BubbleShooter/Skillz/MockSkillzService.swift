@@ -36,7 +36,11 @@ final class MockSkillzService: SkillzProviding {
     func simulateTournamentStart(
         matchID: UInt64 = 42_001,
         matchSeed: String = "sandbox-match-seed-42001",
-        gameParameters: [String: String] = ["TimeLimit": "120"],
+        gameParameters: [String: String] = [
+            "TimeLimit": "120",
+            "InitialRows": "5",
+            "ColorCount": "6",
+        ],
         isSynchronous: Bool = false
     ) {
         isMatchInProgress = true
