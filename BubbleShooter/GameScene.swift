@@ -7,21 +7,27 @@ import SpriteKit
 
 final class GameScene: SKScene {
 
+    weak var hudDelegate: GameSceneHUDDelegate?
+
     // MARK: - Match State
 
     private(set) var matchContext: SkillzMatchContext?
     private(set) var grid: BubbleGrid?
     private(set) var gameplayParameters: MatchGameplayParameters?
+    var matchScore = MatchScore()
+
+    var matchTimer: MatchTimer?
+    var isMatchActive = false
+    var isMatchEnded = false
+    var lastUpdateTime: TimeInterval = 0
 
     private var random: DeterministicRandom?
-    private var shotQueue: ShotQueue?
-    private var hexLayout: HexLayout?
+    var shotQueue: ShotQueue?
+    var hexLayout: HexLayout?
 
     private var gridRenderer: GridRenderer?
     private var cannonPivot: CannonAimPivot?
     private var aimController: AimController?
-    private var hudLabel: SKLabelNode?
-
     private var isLayoutReady = false
     private var isShooting = false
     private var flyingBubble: BubbleNode?
@@ -38,6 +44,7 @@ final class GameScene: SKScene {
         random = matchRandom
         grid = LevelGenerator.generate(random: matchRandom, parameters: parameters)
         shotQueue = ShotQueue(random: matchRandom, colorCount: parameters.colorCount)
+        matchScore = MatchScore()
 
         if isLayoutReady {
             applyLayout()
@@ -47,7 +54,7 @@ final class GameScene: SKScene {
     // MARK: - Scene Lifecycle
 
     override func didMove(to view: SKView) {
-        backgroundColor = Theme.SK.backgroundDeep
+        backgroundColor = .clear
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
         isLayoutReady = true
         BubbleTextureCache.preload()
@@ -59,6 +66,10 @@ final class GameScene: SKScene {
         guard isLayoutReady, size.width > 1, size.height > 1 else { return }
         guard oldSize != size else { return }
         applyLayout()
+    }
+
+    override func update(_ currentTime: TimeInterval) {
+        tickMatch(currentTime: currentTime)
     }
 }
 
@@ -86,24 +97,26 @@ private extension GameScene {
         addChild(renderer.container)
         gridRenderer = renderer
 
-        let cannonPosition = CGPoint(x: 0, y: -size.height / 2 + 112)
+        let cannonPosition = CGPoint(x: 0, y: CannonRenderer.pivotY(sceneHeight: size.height))
         let pivot = CannonAimPivot(
             cannonPosition: cannonPosition,
             bubbleDiameter: layout.bubbleVisualDiameter
         )
         if let shotQueue {
-            pivot.cannon.update(current: shotQueue.current, next: shotQueue.next)
+            pivot.cannon.update(current: shotQueue.current)
         }
         addChild(pivot)
         cannonPivot = pivot
 
         aimController = AimController(cannonPosition: cannonPosition)
 
-        updateHUD(grid: grid, parameters: gameplayParameters)
+        if isMatchActive {
+            publishHUD()
+        }
     }
 
     func playBounds(for layout: HexLayout) -> CGRect {
-        let margin: CGFloat = 24
+        let margin = HexLayout.Metrics.horizontalEdgeInset
         let ceilingY = layout.topCenter.y + layout.bubbleVisualDiameter * 0.55
         return CGRect(
             x: -size.width / 2 + margin,
@@ -121,28 +134,6 @@ private extension GameScene {
         grid.occupiedPositions.map { position in
             (position, layout.center(for: position, configuration: configuration))
         }
-    }
-
-    func updateHUD(
-        grid: BubbleGrid,
-        parameters: MatchGameplayParameters,
-        lastPopCount: Int? = nil
-    ) {
-        hudLabel?.removeFromParent()
-
-        let seed = matchContext?.matchSeed ?? "—"
-        let popText = lastPopCount.map { "pop ×\($0)! · " } ?? ""
-        let effectText = "\(BubblePopEffectPlayer.style.displayName) · "
-        let label = SKLabelNode(fontNamed: Theme.Typography.skBody())
-        label.text = "\(popText)\(effectText)\(grid.occupiedPositions.count) bubbles · aim & shoot · seed: \(seed)"
-        label.fontSize = 13
-        label.fontColor = Theme.SK.textPrimary.withAlphaComponent(0.75)
-        label.position = CGPoint(x: 0, y: -size.height / 2 + 48)
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-        label.zPosition = 100
-        addChild(label)
-        hudLabel = label
     }
 
     func bringNodeToFront(_ node: SKNode) {
@@ -166,7 +157,8 @@ private extension GameScene {
 private extension GameScene {
 
     func updateAim(toward scenePoint: CGPoint) {
-        guard !isShooting,
+        guard isMatchActive, !isMatchEnded,
+              !isShooting,
               let layout = hexLayout,
               let grid,
               let gameplayParameters,
@@ -185,7 +177,8 @@ private extension GameScene {
     }
 
     func fireShot(toward scenePoint: CGPoint) {
-        guard !isShooting,
+        guard isMatchActive, !isMatchEnded,
+              !isShooting,
               let layout = hexLayout,
               let grid,
               let gameplayParameters,
@@ -202,6 +195,12 @@ private extension GameScene {
         let shotBubble = shotQueue.current
         let flightPath = visualFlightPath(from: path, layout: layout)
 
+        if var queue = self.shotQueue, let random = self.random {
+            queue.advance(random: random, colorCount: gameplayParameters.colorCount)
+            self.shotQueue = queue
+        }
+        publishHUD()
+
         isShooting = true
         cannonPivot?.hideAimGuide()
         pendingShotPath = path
@@ -215,17 +214,11 @@ private extension GameScene {
             in: self
         ) { [weak self] in
             guard let self else { return }
-            self.finishShot(
-                shotBubble: shotBubble,
-                colorCount: gameplayParameters.colorCount
-            )
+            self.finishShot(shotBubble: shotBubble)
         }
     }
 
-    func finishShot(
-        shotBubble: Bubble,
-        colorCount: Int
-    ) {
+    func finishShot(shotBubble: Bubble) {
         defer {
             pendingShotPath = nil
             flyingBubble?.removeFromParent()
@@ -261,7 +254,7 @@ private extension GameScene {
         if let snapPosition = snapAnalysis.chosen {
             do {
                 try grid.place(shotBubble, at: snapPosition)
-                resolveMatches(
+                resolveTurn(
                     at: snapPosition,
                     grid: &grid,
                     layout: layout,
@@ -273,57 +266,130 @@ private extension GameScene {
             }
         }
 
-        if var queue = shotQueue, let random {
-            queue.advance(random: random, colorCount: colorCount)
-            shotQueue = queue
-            cannonPivot?.cannon.replenishAfterShot(next: queue.next)
+        if let queue = shotQueue {
+            cannonPivot?.cannon.setCurrent(queue.current)
         }
+
+        publishHUD()
     }
 
-    func resolveMatches(
+    func resolveTurn(
         at position: GridPosition,
         grid: inout BubbleGrid,
         layout: HexLayout,
         configuration: GridConfiguration,
         parameters: MatchGameplayParameters
     ) {
-        var popCount: Int?
+        var lastPopCount: Int?
+        var lastDropCount: Int?
 
-        let matchGroup = MatchFinder.matchingGroup(including: position, in: grid)
+        if let group = MatchFinder.matchingGroup(including: position, in: grid) {
+            #if DEBUG
+            GridDebugPrinter.logMatchResult(
+                at: position,
+                grid: grid,
+                configuration: configuration,
+                group: group
+            )
+            #endif
 
-        #if DEBUG
-        GridDebugPrinter.logMatchResult(
-            at: position,
-            grid: grid,
-            configuration: configuration,
-            group: matchGroup
-        )
-        #endif
+            lastPopCount = group.count
+            matchScore.addPop(bubbleCount: group.count)
+            let popSpecs = popSpecs(
+                for: group,
+                grid: grid,
+                layout: layout,
+                configuration: configuration
+            )
+            let popPoints = ScoreCalculator.popPoints(forBubbleCount: group.count)
+            removeGroup(
+                group,
+                from: &grid,
+                layout: layout,
+                configuration: configuration,
+                playPopEffect: true
+            )
+            ScoreFloater.play(points: popPoints, near: popSpecs, kind: .pop, in: self)
+        } else {
+            #if DEBUG
+            GridDebugPrinter.logMatchResult(
+                at: position,
+                grid: grid,
+                configuration: configuration,
+                group: nil
+            )
+            #endif
+        }
 
-        if let group = matchGroup {
-            popCount = group.count
-            let specs = group.compactMap { gridPosition -> BubblePopSpec? in
-                guard let bubble = grid.bubble(at: gridPosition) else { return nil }
-                return BubblePopSpec(
-                    center: layout.center(for: gridPosition, configuration: configuration),
-                    color: bubble.color
-                )
-            }
+        let floating = ConnectivityChecker.floatingPositions(in: grid)
+        if !floating.isEmpty {
+            lastDropCount = floating.count
+            matchScore.addDrop(bubbleCount: floating.count)
+            let dropSpecs = popSpecs(
+                for: floating,
+                grid: grid,
+                layout: layout,
+                configuration: configuration
+            )
+            let dropPoints = ScoreCalculator.dropPoints(forBubbleCount: floating.count)
+            removeGroup(
+                floating,
+                from: &grid,
+                layout: layout,
+                configuration: configuration,
+                playPopEffect: false
+            )
+            ScoreFloater.play(points: dropPoints, near: dropSpecs, kind: .drop, in: self)
+        }
 
-            for gridPosition in group {
-                try? grid.remove(at: gridPosition)
-            }
+        self.grid = grid
+        gridRenderer?.render(grid: grid)
+        evaluateMatchEndAfterTurn()
+    }
 
+    func popSpecs(
+        for positions: [GridPosition],
+        grid: BubbleGrid,
+        layout: HexLayout,
+        configuration: GridConfiguration
+    ) -> [BubblePopSpec] {
+        positions.compactMap { gridPosition -> BubblePopSpec? in
+            guard let bubble = grid.bubble(at: gridPosition) else { return nil }
+            return BubblePopSpec(
+                center: layout.center(for: gridPosition, configuration: configuration),
+                color: bubble.color
+            )
+        }
+    }
+
+    func removeGroup(
+        _ positions: [GridPosition],
+        from grid: inout BubbleGrid,
+        layout: HexLayout,
+        configuration: GridConfiguration,
+        playPopEffect: Bool
+    ) {
+        let specs = popSpecs(for: positions, grid: grid, layout: layout, configuration: configuration)
+
+        for gridPosition in positions {
+            try? grid.remove(at: gridPosition)
+        }
+
+        guard !specs.isEmpty else { return }
+
+        if playPopEffect {
             BubblePopEffectPlayer.playGroup(
                 specs,
                 bubbleDiameter: layout.bubbleVisualDiameter,
                 in: self
             )
+        } else {
+            BubbleDropEffect.playGroup(
+                specs,
+                bubbleDiameter: layout.bubbleVisualDiameter,
+                in: self
+            )
         }
-
-        self.grid = grid
-        gridRenderer?.render(grid: grid)
-        updateHUD(grid: grid, parameters: parameters, lastPopCount: popCount)
     }
 
     func simulatedPath(
@@ -373,6 +439,119 @@ private extension GameScene {
             y: hit.y - dy / length * pullBack
         )
         return ShotPath(points: points, hit: path.hit)
+    }
+}
+
+// MARK: - Match lifecycle
+
+extension GameScene {
+
+    func beginMatch() {
+        guard let parameters = gameplayParameters else { return }
+
+        isMatchEnded = false
+        isMatchActive = true
+        lastUpdateTime = 0
+        matchTimer = MatchTimer(durationSeconds: parameters.timeLimitSeconds)
+        publishHUD()
+    }
+
+    func tickMatch(currentTime: TimeInterval) {
+        guard isMatchActive, !isMatchEnded else { return }
+        guard var timer = matchTimer else { return }
+
+        let delta: TimeInterval
+        if lastUpdateTime > 0 {
+            delta = currentTime - lastUpdateTime
+        } else {
+            delta = 0
+        }
+        lastUpdateTime = currentTime
+
+        guard delta > 0 else { return }
+
+        if timer.advance(delta: delta) {
+            matchTimer = timer
+            publishHUD()
+
+            if timer.isExpired {
+                endMatch(reason: .timeUp)
+            }
+        }
+    }
+
+    func publishHUD() {
+        guard let parameters = gameplayParameters,
+              let layout = hexLayout,
+              let grid,
+              let shotQueue,
+              let timer = matchTimer else { return }
+
+        let configuration = parameters.gridConfiguration
+        let dangerY = layout.dangerLineY(sceneHeight: size.height)
+        let isDanger = DangerLineLogic.isWarningActive(
+            grid: grid,
+            layout: layout,
+            configuration: configuration,
+            dangerLineY: dangerY
+        )
+
+        let state = MatchHUDState(
+            score: matchScore.total,
+            timeRemainingSeconds: timer.remainingSeconds,
+            nextBubble: shotQueue.next.color,
+            currentBubble: shotQueue.current.color,
+            isDangerActive: isDanger,
+            canSwap: false
+        )
+
+        hudDelegate?.gameScene(self, didUpdateHUD: state)
+    }
+
+    func evaluateMatchEndAfterTurn() {
+        guard isMatchActive, !isMatchEnded,
+              let grid,
+              let layout = hexLayout,
+              let configuration = gameplayParameters?.gridConfiguration else { return }
+
+        if grid.occupiedPositions.isEmpty {
+            endMatch(reason: .boardCleared)
+            return
+        }
+
+        let dangerY = layout.dangerLineY(sceneHeight: size.height)
+        if DangerLineLogic.hasBubbleBelowLine(
+            grid: grid,
+            layout: layout,
+            configuration: configuration,
+            dangerLineY: dangerY
+        ) {
+            endMatch(reason: .dangerLine)
+        }
+    }
+
+    func endMatch(reason: MatchEndReason) {
+        guard !isMatchEnded else { return }
+
+        isMatchEnded = true
+        isMatchActive = false
+
+        if reason == .timeUp, let timer = matchTimer {
+            matchScore.setTimeBonus(remainingSeconds: timer.remainingSeconds)
+        }
+
+        let results = MatchResultsState(
+            finalScore: matchScore.total,
+            popPoints: matchScore.popPoints,
+            dropPoints: matchScore.dropPoints,
+            timeBonus: matchScore.timeBonusPoints,
+            isNewBest: false,
+            didClearBoard: reason == .boardCleared,
+            didLoseOnDanger: reason == .dangerLine
+        )
+
+        publishHUD()
+        hudDelegate?.gameSceneDidRequestMatchEnd(self, results: results)
     }
 }
 

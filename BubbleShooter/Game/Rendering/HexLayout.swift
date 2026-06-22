@@ -8,6 +8,15 @@ import CoreGraphics
 /// Converts hex grid coordinates to scene positions (odd-row offset / honeycomb layout).
 struct HexLayout: Equatable, Sendable {
 
+    /// Insets that align the grid with the bordered playfield `SKView`.
+    enum Metrics {
+        static let horizontalEdgeInset: CGFloat = 4
+        static let topEdgeInset: CGFloat = 6
+    }
+
+    /// Vertical space reserved for the cannon — depends on bubble size.
+    let cannonReservedBottomHeight: CGFloat
+
     /// Base center-to-center pitch derived from screen width.
     let gridPitch: CGFloat
     /// Horizontal center distance after tightening.
@@ -18,16 +27,18 @@ struct HexLayout: Equatable, Sendable {
     let bubbleCollisionRadius: CGFloat
     let topCenter: CGPoint
 
+    /// Center-to-center distance between rows.
+    var verticalRowStep: CGFloat { rowStep }
+
     private let rowStep: CGFloat
 
     private static let hexRowStepRatio = sqrt(3) / 2
-    private static let visualDiameterRatio: CGFloat = 0.94
+    private static let visualDiameterRatio: CGFloat = 0.96
     /// Pull bubble centers closer on both axes (points).
-    private static let spacingTighten: CGFloat = 3
+    private static let spacingTighten: CGFloat = 2
 
-    init(sceneSize: CGSize, columnCount: Int, topPadding: CGFloat = 96) {
-        let horizontalPadding: CGFloat = 24
-        let availableWidth = sceneSize.width - horizontalPadding * 2
+    init(sceneSize: CGSize, columnCount: Int) {
+        let availableWidth = sceneSize.width - Metrics.horizontalEdgeInset * 2
         let pitch = floor(availableWidth / CGFloat(columnCount))
         gridPitch = pitch
         horizontalPitch = pitch - Self.spacingTighten
@@ -37,7 +48,31 @@ struct HexLayout: Equatable, Sendable {
             bubbleVisualDiameter / 2,
             gridPitch / 2 - 0.5
         )
-        topCenter = CGPoint(x: 0, y: sceneSize.height / 2 - topPadding)
+        topCenter = CGPoint(
+            x: 0,
+            y: sceneSize.height / 2 - Metrics.topEdgeInset - bubbleVisualDiameter / 2
+        )
+        cannonReservedBottomHeight = CannonRenderer.reservedBottomHeight(
+            bubbleDiameter: bubbleVisualDiameter
+        )
+    }
+
+    /// Top Y of the grid play area in scene coordinates.
+    var gridAreaTopY: CGFloat {
+        topCenter.y + bubbleVisualDiameter / 2
+    }
+
+    /// Bottom Y reserved for the cannon in scene coordinates.
+    func gridAreaBottomY(sceneHeight: CGFloat) -> CGFloat {
+        -sceneHeight / 2 + cannonReservedBottomHeight
+    }
+
+    /// Invisible lose threshold — same position the old danger line used.
+    func dangerLineY(sceneHeight: CGFloat, normalizedY: CGFloat = 0.72) -> CGFloat {
+        let gridAreaTop = gridAreaTopY
+        let gridAreaBottom = gridAreaBottomY(sceneHeight: sceneHeight)
+        let gridAreaHeight = gridAreaTop - gridAreaBottom
+        return gridAreaTop - gridAreaHeight * normalizedY
     }
 
     func center(for position: GridPosition, configuration: GridConfiguration) -> CGPoint {

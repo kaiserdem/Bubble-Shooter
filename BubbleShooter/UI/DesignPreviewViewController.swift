@@ -83,6 +83,30 @@ final class DesignPreviewViewController: UIViewController {
     ) {
       self.makeBubblePalette()
     })
+    stackView.addArrangedSubview(makeSection(
+      title: "Match Layout",
+      subtitle: "HUD зверху, ігрове поле з рамкою"
+    ) {
+      self.makeMatchHUDPreview()
+    })
+    stackView.addArrangedSubview(makeSection(
+      title: "Match Layout — Low Timer",
+      subtitle: "Таймер ≤10 сек — червоний акцент"
+    ) {
+      self.makeMatchHUDLowTimerPreview()
+    })
+    stackView.addArrangedSubview(makeSection(
+      title: "Match Results",
+      subtitle: "Фінальний екран з breakdown"
+    ) {
+      self.makeMatchResultsPreview(state: .preview)
+    })
+    stackView.addArrangedSubview(makeSection(
+      title: "Match Results — Variants",
+      subtitle: "TIME'S UP та DANGER!"
+    ) {
+      self.makeMatchResultsVariants()
+    })
 
     let closeButton = ArcadeButton(title: "Закрити", style: .ghost)
     closeButton.addAction(UIAction { [weak self] _ in
@@ -195,6 +219,57 @@ final class DesignPreviewViewController: UIViewController {
       stack.addArrangedSubview(swatch)
     }
 
+    return stack
+  }
+
+  private func makeMatchHUDPreview() -> UIView {
+    let layout = MatchLayoutView()
+    layout.translatesAutoresizingMaskIntoConstraints = false
+    layout.isUserInteractionEnabled = false
+    layout.update(with: .preview)
+    layout.heightAnchor.constraint(equalToConstant: 520).isActive = true
+    return layout
+  }
+
+  private func makeMatchHUDLowTimerPreview() -> UIView {
+    let layout = MatchLayoutView()
+    layout.translatesAutoresizingMaskIntoConstraints = false
+    layout.isUserInteractionEnabled = false
+    var lowTimerState = MatchHUDState.preview
+    lowTimerState.timeRemainingSeconds = 8
+    layout.update(with: lowTimerState)
+    layout.heightAnchor.constraint(equalToConstant: 520).isActive = true
+    return layout
+  }
+
+  private func makeMatchResultsPreview(state: MatchResultsState) -> UIView {
+    let container = UIView()
+    container.translatesAutoresizingMaskIntoConstraints = false
+    container.heightAnchor.constraint(equalToConstant: 380).isActive = true
+
+    let results = MatchResultsView()
+    results.translatesAutoresizingMaskIntoConstraints = false
+    results.isUserInteractionEnabled = false
+    container.addSubview(results)
+
+    NSLayoutConstraint.activate([
+      results.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+      results.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+      results.topAnchor.constraint(equalTo: container.topAnchor),
+      results.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+    ])
+
+    results.present(with: state, animated: false)
+    return container
+  }
+
+  private func makeMatchResultsVariants() -> UIView {
+    let stack = UIStackView()
+    stack.axis = .vertical
+    stack.spacing = Theme.Metrics.spacingLarge
+
+    stack.addArrangedSubview(makeMatchResultsPreview(state: .timeUpPreview))
+    stack.addArrangedSubview(makeMatchResultsPreview(state: .dangerPreview))
     return stack
   }
 }

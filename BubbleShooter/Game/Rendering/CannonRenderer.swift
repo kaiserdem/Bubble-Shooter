@@ -5,7 +5,8 @@
 
 import SpriteKit
 
-/// Cannon sprite (`gun-1`), current bubble in the diamond port, next-bubble preview.
+/// Cannon sprite (`gun-1`) and the loaded bubble in the diamond port.
+/// Next bubble preview lives in the UIKit HUD (`GameHUDView`).
 final class CannonRenderer: SKNode {
 
     private static let gunSpriteName = "gun-1"
@@ -14,19 +15,28 @@ final class CannonRenderer: SKNode {
     private static let gunWidthRatio: CGFloat = 2.35 * 1.6 * 1.1
     private static let gunVerticalOffset: CGFloat = -40
     private static let bubbleVerticalOffset: CGFloat = -35
-    private static let nextBubbleHorizontalRatio: CGFloat = 0
-    private static let nextBubbleBelowGunPadding: CGFloat = -3
-    private static let nextBubbleScaleRatio: CGFloat = 0.55
-    private static let promoteIntoLaunchDuration: TimeInterval = 0.22
+    private static let pivotBottomPadding: CGFloat = 4
+
+    /// Pivot Y so the gun base sits on the bottom edge of the playfield.
+    static func pivotY(sceneHeight: CGFloat) -> CGFloat {
+        -sceneHeight / 2 + pivotBottomPadding - gunVerticalOffset
+    }
+
+    /// Vertical space reserved at the bottom for the cannon artwork.
+    static func reservedBottomHeight(bubbleDiameter: CGFloat) -> CGFloat {
+        let texture = SKTexture(imageNamed: gunSpriteName)
+        let textureSize = texture.size()
+        let aspect = textureSize.height / max(textureSize.width, 1)
+        let gunHeight = bubbleDiameter * gunWidthRatio * aspect
+        return pivotBottomPadding - gunVerticalOffset + gunHeight + 8
+    }
 
     private let gunNode: SKSpriteNode
     private let bubbleDiameter: CGFloat
-    private let gunHeight: CGFloat
 
     private(set) var launchBubbleOffsetY: CGFloat
 
     private var currentBubbleNode: BubbleNode?
-    private var nextBubbleNode: BubbleNode?
 
     init(cannonPosition: CGPoint, bubbleDiameter: CGFloat) {
         self.bubbleDiameter = bubbleDiameter
@@ -36,7 +46,6 @@ final class CannonRenderer: SKNode {
         let aspect = textureSize.height / max(textureSize.width, 1)
         let gunWidth = bubbleDiameter * Self.gunWidthRatio
         let gunHeight = gunWidth * aspect
-        self.gunHeight = gunHeight
         self.launchBubbleOffsetY = Self.gunVerticalOffset
             + gunHeight * Self.diamondCenterRatio
             + Self.bubbleVerticalOffset
@@ -57,63 +66,26 @@ final class CannonRenderer: SKNode {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func update(current: Bubble, next: Bubble) {
-        currentBubbleNode?.removeFromParent()
-        nextBubbleNode?.removeFromParent()
-
-        let currentNode = BubbleNode(bubble: current, diameter: bubbleDiameter, zPosition: -1)
-        currentNode.position = CGPoint(x: 0, y: launchBubbleOffsetY)
-        currentBubbleNode = currentNode
-
-        let nextDiameter = bubbleDiameter * Self.nextBubbleScaleRatio
-        let nextNode = BubbleNode(bubble: next, diameter: nextDiameter, zPosition: -1)
-        nextNode.position = nextBubbleSlotPosition(nextDiameter: nextDiameter)
-        nextBubbleNode = nextNode
-
-        placeBubblesBelowGun()
+    func update(current: Bubble) {
+        setCurrent(current)
     }
 
-    /// Removes the shot bubble and animates the next bubble up into the launch slot.
+    /// Clears the launch port when the bubble leaves the cannon.
     func beginShot() {
         currentBubbleNode?.removeAllActions()
         currentBubbleNode?.removeFromParent()
         currentBubbleNode = nil
-
-        guard let promotingNode = nextBubbleNode else { return }
-        promotingNode.removeAllActions()
-
-        let launchPosition = CGPoint(x: 0, y: launchBubbleOffsetY)
-        let move = SKAction.move(to: launchPosition, duration: Self.promoteIntoLaunchDuration)
-        move.timingMode = .easeIn
-        let scaleUp = SKAction.scale(
-            to: 1 / Self.nextBubbleScaleRatio,
-            duration: Self.promoteIntoLaunchDuration
-        )
-        scaleUp.timingMode = .easeIn
-
-        promotingNode.run(SKAction.sequence([
-            SKAction.group([move, scaleUp]),
-            SKAction.run { [weak self] in
-                guard let self else { return }
-                self.currentBubbleNode = promotingNode
-                self.nextBubbleNode = nil
-                self.bringGunToFront()
-            }
-        ]))
     }
 
-    /// Spawns the new queue preview bubble below the cannon after a shot resolves.
-    func replenishAfterShot(next: Bubble) {
-        nextBubbleNode?.removeAllActions()
-        nextBubbleNode?.removeFromParent()
+    /// Loads the new current bubble after the shot queue advances.
+    func setCurrent(_ bubble: Bubble) {
+        currentBubbleNode?.removeAllActions()
+        currentBubbleNode?.removeFromParent()
 
-        let nextDiameter = bubbleDiameter * Self.nextBubbleScaleRatio
-        let nextNode = BubbleNode(bubble: next, diameter: nextDiameter, zPosition: -1)
-        nextNode.position = nextBubbleSlotPosition(nextDiameter: nextDiameter)
-        nextNode.alpha = 0
-        nextBubbleNode = nextNode
-        placeBubblesBelowGun()
-        nextNode.run(SKAction.fadeIn(withDuration: 0.14))
+        let node = BubbleNode(bubble: bubble, diameter: bubbleDiameter, zPosition: -1)
+        node.position = CGPoint(x: 0, y: launchBubbleOffsetY)
+        currentBubbleNode = node
+        placeCurrentBelowGun()
     }
 
     func hideCurrentBubble() {
@@ -126,29 +98,13 @@ final class CannonRenderer: SKNode {
 
     // MARK: - Private
 
-    private func nextBubbleSlotPosition(nextDiameter: CGFloat) -> CGPoint {
-        CGPoint(
-            x: bubbleDiameter * Self.nextBubbleHorizontalRatio,
-            y: Self.gunVerticalOffset - nextDiameter * 0.5 - Self.nextBubbleBelowGunPadding
-        )
-    }
-
-    /// Bubbles sit under the gun sprite so they show through the diamond port.
-    private func placeBubblesBelowGun() {
-        if let currentBubbleNode {
-            attachIfNeeded(currentBubbleNode)
-            currentBubbleNode.zPosition = -1
+    private func placeCurrentBelowGun() {
+        guard let currentBubbleNode else { return }
+        if currentBubbleNode.parent !== self {
+            addChild(currentBubbleNode)
         }
-        if let nextBubbleNode {
-            attachIfNeeded(nextBubbleNode)
-            nextBubbleNode.zPosition = -1
-        }
+        currentBubbleNode.zPosition = -1
         bringGunToFront()
-    }
-
-    private func attachIfNeeded(_ node: SKNode) {
-        guard node.parent !== self else { return }
-        addChild(node)
     }
 
     private func bringGunToFront() {

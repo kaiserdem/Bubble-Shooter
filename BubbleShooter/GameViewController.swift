@@ -18,19 +18,18 @@ final class GameViewController: UIViewController {
     // MARK: - State
 
     private var skillzService: SkillzProviding = MockSkillzService.shared
-    private var gameScene: GameScene?
-    private var lobbyView: SandboxLobbyView?
-    #if DEBUG
-    private var designPreviewController: DesignPreviewViewController?
-    #endif
+    var gameScene: GameScene?
+    private var mainMenuView: MainMenuContainerView?
+    private var matchLayoutView: MatchLayoutView?
+    private var matchIntroOverlay: MatchIntroOverlayView?
+    private var matchResultsView: MatchResultsView?
 
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureSpriteKitView()
         configureSkillz()
-        showSandboxLobbyIfNeeded()
+        showMainMenuIfNeeded()
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -47,18 +46,15 @@ final class GameViewController: UIViewController {
 extension GameViewController: SkillzGameDelegate {
 
     func tournamentWillBegin(matchContext: SkillzMatchContext) {
-        hideSandboxLobby()
+        hideMainMenu()
         DispatchQueue.main.async { [weak self] in
             self?.presentGameScene(with: matchContext)
         }
     }
 
     func skillzWillExit() {
-        if let skView = view as? SKView {
-            skView.presentScene(nil)
-        }
-        gameScene = nil
-        showSandboxLobbyIfNeeded()
+        teardownMatchUI()
+        showMainMenuIfNeeded()
     }
 
     func preferredSkillzInterfaceOrientation() -> UIInterfaceOrientationMask {
@@ -69,18 +65,6 @@ extension GameViewController: SkillzGameDelegate {
 // MARK: - Scene Presentation
 
 private extension GameViewController {
-
-    func configureSpriteKitView() {
-        guard let skView = view as? SKView else { return }
-        skView.ignoresSiblingOrder = true
-        #if DEBUG
-        skView.showsFPS = true
-        skView.showsNodeCount = true
-        #else
-        skView.showsFPS = false
-        skView.showsNodeCount = false
-        #endif
-    }
 
     func configureSkillz() {
         #if USE_SKILLZ_SDK
@@ -99,10 +83,22 @@ private extension GameViewController {
     }
 
     func presentGameScene(with matchContext: SkillzMatchContext) {
-        guard let skView = view as? SKView else { return }
+        guard let containerView = view else { return }
 
-        view.layoutIfNeeded()
-        let sceneSize = skView.bounds.size
+        let layout = MatchLayoutView()
+        layout.translatesAutoresizingMaskIntoConstraints = false
+        layout.isHidden = true
+        containerView.addSubview(layout)
+        NSLayoutConstraint.activate([
+            layout.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            layout.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            layout.topAnchor.constraint(equalTo: containerView.topAnchor),
+            layout.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+        ])
+        matchLayoutView = layout
+
+        containerView.layoutIfNeeded()
+        let sceneSize = layout.gameSKView.bounds.size
         guard sceneSize.width > 1, sceneSize.height > 1 else { return }
 
         let scene = GameScene(size: sceneSize)
@@ -110,82 +106,111 @@ private extension GameViewController {
         scene.configure(with: matchContext)
 
         gameScene = scene
-        skView.presentScene(scene, transition: .crossFade(withDuration: 0.35))
+        scene.hudDelegate = self
+        layout.gameSKView.presentScene(scene, transition: .crossFade(withDuration: 0.35))
+        setupMatchUI()
     }
 
-    func showSandboxLobbyIfNeeded() {
-        #if DEBUG
-        guard lobbyView == nil else { return }
+    func setupMatchUI() {
+        guard let containerView = view, let layout = matchLayoutView else { return }
 
-        let lobby = SandboxLobbyView()
-        lobby.onLaunchSkillz = { [weak self] in
-            #if USE_SKILLZ_SDK
-            SkillzSDKBridge.launchSkillz()
-            #else
-            self?.skillzService.launchSkillz()
+        let intro = MatchIntroOverlayView()
+        intro.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(intro)
+        matchIntroOverlay = intro
+
+        let results = MatchResultsView()
+        results.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(results)
+        matchResultsView = results
+
+        NSLayoutConstraint.activate([
+            intro.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            intro.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            intro.topAnchor.constraint(equalTo: containerView.topAnchor),
+            intro.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+
+            results.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            results.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            results.topAnchor.constraint(equalTo: containerView.topAnchor),
+            results.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+        ])
+
+        results.onContinue = { [weak self] in
+            self?.matchResultsView?.dismiss { [weak self] in
+                MockSkillzService.shared.simulateSkillzExit()
+            }
+        }
+
+        #if DEBUG
+        let tripleTap = UITapGestureRecognizer(target: self, action: #selector(handleHUDTripleTap))
+        tripleTap.numberOfTapsRequired = 3
+        layout.hudView.addGestureRecognizer(tripleTap)
+        #endif
+
+        intro.playCountdown { [weak self] in
+            self?.matchLayoutView?.isHidden = false
+            self?.gameScene?.beginMatch()
+            #if DEBUG
+            // Triple-tap HUD still opens results preview.
             #endif
         }
-        lobby.onStartSandboxMatch = { [weak self] in
-            MockSkillzService.shared.simulateTournamentStart()
-        }
-        lobby.onStartDeterminismTest = { [weak self] in
-            MockSkillzService.shared.simulateTournamentStart(
-                matchID: 99_999,
-                matchSeed: "determinism-test-seed"
-            )
-        }
-        lobby.onOpenDesignPreview = { [weak self] in
-            self?.showDesignPreview()
-        }
-
-        lobby.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(lobby)
-        NSLayoutConstraint.activate([
-            lobby.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            lobby.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            lobby.topAnchor.constraint(equalTo: view.topAnchor),
-            lobby.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-        ])
-        lobbyView = lobby
-        #endif
     }
 
-    func hideSandboxLobby() {
-        lobbyView?.removeFromSuperview()
-        lobbyView = nil
+    func teardownMatchUI() {
+        matchLayoutView?.gameSKView.presentScene(nil)
+        matchLayoutView?.removeFromSuperview()
+        matchIntroOverlay?.removeFromSuperview()
+        matchResultsView?.dismiss(animated: false)
+        matchResultsView?.removeFromSuperview()
+
+        matchLayoutView = nil
+        matchIntroOverlay = nil
+        matchResultsView = nil
+        gameScene = nil
     }
 
     #if DEBUG
-    func showDesignPreview() {
-        guard designPreviewController == nil else { return }
-
-        hideSandboxLobby()
-
-        let preview = DesignPreviewViewController()
-        preview.onClose = { [weak self] in
-            self?.hideDesignPreview()
-            self?.showSandboxLobbyIfNeeded()
-        }
-
-        addChild(preview)
-        preview.view.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(preview.view)
-        NSLayoutConstraint.activate([
-            preview.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            preview.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            preview.view.topAnchor.constraint(equalTo: view.topAnchor),
-            preview.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-        ])
-        preview.didMove(toParent: self)
-        designPreviewController = preview
-    }
-
-    func hideDesignPreview() {
-        guard let preview = designPreviewController else { return }
-        preview.willMove(toParent: nil)
-        preview.view.removeFromSuperview()
-        preview.removeFromParent()
-        designPreviewController = nil
+    @objc func handleHUDTripleTap() {
+        matchResultsView?.present(with: .preview)
     }
     #endif
+
+    func showMainMenuIfNeeded() {
+        guard mainMenuView == nil else { return }
+
+        let menu = MainMenuContainerView()
+        menu.onPlay = {
+            #if USE_SKILLZ_SDK
+            SkillzSDKBridge.launchSkillz()
+            #else
+            MockSkillzService.shared.simulateTournamentStart()
+            #endif
+        }
+
+        view.addSubview(menu)
+        NSLayoutConstraint.activate([
+            menu.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            menu.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            menu.topAnchor.constraint(equalTo: view.topAnchor),
+            menu.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+        mainMenuView = menu
+    }
+
+    func hideMainMenu() {
+        mainMenuView?.removeFromSuperview()
+        mainMenuView = nil
+    }
+}
+
+extension GameViewController: GameSceneHUDDelegate {
+
+    func gameScene(_ scene: GameScene, didUpdateHUD state: MatchHUDState) {
+        matchLayoutView?.update(with: state)
+    }
+
+    func gameSceneDidRequestMatchEnd(_ scene: GameScene, results: MatchResultsState) {
+        matchResultsView?.present(with: results)
+    }
 }

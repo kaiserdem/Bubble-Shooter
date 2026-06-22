@@ -17,6 +17,15 @@ enum Theme {
         static let variant = "Twilight"
     }
 
+    // MARK: - Assets
+
+    enum Asset {
+        enum Background {
+            static let lobby = "lobby background"
+            static let game = "game background"
+        }
+    }
+
     // MARK: - Backgrounds
 
     enum Background {
@@ -99,28 +108,36 @@ enum Theme {
     // MARK: - Typography
 
     enum Typography {
+        /// PostScript name inside `boinklet.ttf` (Boink LET Plain).
+        static let postScriptName = "BoinkLET-Plain"
+
         static func title(_ size: CGFloat = 28) -> UIFont {
-            .systemFont(ofSize: size, weight: .bold).rounded
+            font(size: size)
         }
 
         static func headline(_ size: CGFloat = 20) -> UIFont {
-            .systemFont(ofSize: size, weight: .semibold).rounded
+            font(size: size)
         }
 
         static func body(_ size: CGFloat = 16) -> UIFont {
-            .systemFont(ofSize: size, weight: .medium).rounded
+            font(size: size)
         }
 
         static func caption(_ size: CGFloat = 13) -> UIFont {
-            .systemFont(ofSize: size, weight: .regular).rounded
+            font(size: size)
         }
 
         static func skTitle(_ size: CGFloat = 28) -> String {
-            "AvenirNext-Bold"
+            postScriptName
         }
 
         static func skBody(_ size: CGFloat = 16) -> String {
-            "AvenirNext-Medium"
+            postScriptName
+        }
+
+        private static func font(size: CGFloat) -> UIFont {
+            UIFont(name: postScriptName, size: size)
+                ?? .systemFont(ofSize: size, weight: .bold)
         }
     }
 
@@ -146,12 +163,3 @@ extension UIColor {
     }
 }
 
-// MARK: - Rounded system font
-
-private extension UIFont {
-
-    var rounded: UIFont {
-        guard let descriptor = fontDescriptor.withDesign(.rounded) else { return self }
-        return UIFont(descriptor: descriptor, size: pointSize)
-    }
-}
