@@ -33,8 +33,10 @@ enum LiquidGlassMaterial {
 
     var legacyTintColor: UIColor {
         switch self {
-        case .card, .panel:
+        case .card:
             Theme.Background.deep.withAlphaComponent(0.22)
+        case .panel:
+            UIColor.white.withAlphaComponent(0.05)
         case .overlay:
             Theme.Background.deep.withAlphaComponent(0.28)
         }
@@ -56,10 +58,14 @@ enum LiquidGlassMaterial {
     @available(iOS 26.0, *)
     private func makeLiquidGlassEffect() -> UIVisualEffect {
         switch self {
-        case .card, .panel:
-            UIGlassEffect(style: .clear)
+        case .card:
+            return UIGlassEffect(style: .clear)
+        case .panel:
+            let effect = UIGlassEffect(style: .clear)
+            effect.tintColor = UIColor.white.withAlphaComponent(0.04)
+            return effect
         case .overlay:
-            UIGlassEffect(style: .regular)
+            return UIGlassEffect(style: .regular)
         }
     }
 }

@@ -138,6 +138,14 @@ enum Theme {
             font(size: size)
         }
 
+        /// In-match HUD typography — larger than menu defaults for legibility on glass.
+        enum HUD {
+            static let captionSize: CGFloat = 15
+            static let scoreSize: CGFloat = 34
+            static let timerSize: CGFloat = 26
+            static let nextBubbleSize: CGFloat = 38
+        }
+
         static func skTitle(_ size: CGFloat = 28) -> String {
             postScriptName
         }

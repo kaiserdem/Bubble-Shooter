@@ -6,17 +6,17 @@
 import UIKit
 import SpriteKit
 
-/// Bordered playfield frame — frosted glass over the match wallpaper, bubbles in `gameView`.
+/// Bordered playfield frame — lobby-style glass card over the match wallpaper, bubbles in `gameView`.
 final class GameFieldContainerView: UIView {
 
-    private let glassPanel = GlassPanelView()
+    private let card = GlassCardView()
 
     let gameView: SKView = {
         let view = SKView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.ignoresSiblingOrder = true
         view.clipsToBounds = true
-        view.layer.cornerRadius = Theme.Metrics.cornerRadiusMedium - 2
+        view.layer.cornerRadius = Theme.Metrics.cornerRadiusLarge
         view.allowsTransparency = true
         view.backgroundColor = .clear
         view.isOpaque = false
@@ -25,8 +25,6 @@ final class GameFieldContainerView: UIView {
         view.showsNodeCount = false
         return view
     }()
-
-    private let borderGlowLayer = CALayer()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -38,40 +36,23 @@ final class GameFieldContainerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        borderGlowLayer.frame = bounds.insetBy(dx: -1, dy: -1)
-        borderGlowLayer.cornerRadius = layer.cornerRadius + 1
-    }
-
     // MARK: - Private
 
     private func configure() {
         isOpaque = false
         backgroundColor = .clear
         clipsToBounds = false
-        layer.cornerRadius = Theme.Metrics.cornerRadiusMedium
-        layer.borderWidth = Theme.Metrics.borderWidthGlow
-        layer.borderColor = Theme.Surface.border.cgColor
 
-        glassPanel.translatesAutoresizingMaskIntoConstraints = false
-        glassPanel.cornerRadius = Theme.Metrics.cornerRadiusMedium
-        glassPanel.clipsToBounds = true
+        card.translatesAutoresizingMaskIntoConstraints = false
 
-        borderGlowLayer.shadowColor = Theme.Accent.primaryGlow.cgColor
-        borderGlowLayer.shadowOpacity = 0.35
-        borderGlowLayer.shadowRadius = 14
-        borderGlowLayer.shadowOffset = .zero
-        borderGlowLayer.backgroundColor = UIColor.clear.cgColor
-        layer.insertSublayer(borderGlowLayer, at: 0)
-
-        addSubview(glassPanel)
+        addSubview(card)
         addSubview(gameView)
+
         NSLayoutConstraint.activate([
-            glassPanel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            glassPanel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            glassPanel.topAnchor.constraint(equalTo: topAnchor),
-            glassPanel.bottomAnchor.constraint(equalTo: bottomAnchor),
+            card.leadingAnchor.constraint(equalTo: leadingAnchor),
+            card.trailingAnchor.constraint(equalTo: trailingAnchor),
+            card.topAnchor.constraint(equalTo: topAnchor),
+            card.bottomAnchor.constraint(equalTo: bottomAnchor),
 
             gameView.leadingAnchor.constraint(equalTo: leadingAnchor),
             gameView.trailingAnchor.constraint(equalTo: trailingAnchor),

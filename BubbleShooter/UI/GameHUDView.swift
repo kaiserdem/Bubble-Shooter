@@ -8,7 +8,7 @@ import UIKit
 /// Compact stats bar above the playfield — score, next bubble, timer.
 final class GameHUDView: UIView {
 
-    private let glassPanel = GlassPanelView()
+    private let card = GlassCardView()
     private let scoreCaptionLabel = ArcadeLabel("SCORE", style: .caption)
     private let scoreValueLabel = ArcadeLabel("0", style: .title)
     private let nextCaptionLabel = ArcadeLabel("NEXT", style: .caption)
@@ -52,9 +52,9 @@ final class GameHUDView: UIView {
         isUserInteractionEnabled = true
         isOpaque = false
         backgroundColor = .clear
+        clipsToBounds = false
 
-        glassPanel.translatesAutoresizingMaskIntoConstraints = false
-        glassPanel.cornerRadius = Theme.Metrics.cornerRadiusMedium
+        card.translatesAutoresizingMaskIntoConstraints = false
 
         let hudLabels: [ArcadeLabel] = [
             scoreCaptionLabel, scoreValueLabel,
@@ -65,6 +65,12 @@ final class GameHUDView: UIView {
             Theme.Text.applyHUDLegibility(to: label)
         }
 
+        scoreCaptionLabel.font = Theme.Typography.caption(Theme.Typography.HUD.captionSize)
+        nextCaptionLabel.font = Theme.Typography.caption(Theme.Typography.HUD.captionSize)
+        timerCaptionLabel.font = Theme.Typography.caption(Theme.Typography.HUD.captionSize)
+        scoreValueLabel.font = Theme.Typography.title(Theme.Typography.HUD.scoreSize)
+        timerValueLabel.font = Theme.Typography.headline(Theme.Typography.HUD.timerSize)
+
         scoreCaptionLabel.textAlignment = .left
         scoreValueLabel.textAlignment = .left
         nextCaptionLabel.textAlignment = .center
@@ -73,7 +79,7 @@ final class GameHUDView: UIView {
 
         nextBubbleImageView.contentMode = .scaleAspectFit
         nextBubbleImageView.translatesAutoresizingMaskIntoConstraints = false
-        nextBubbleImageView.layer.cornerRadius = 16
+        nextBubbleImageView.layer.cornerRadius = Theme.Typography.HUD.nextBubbleSize / 2
         nextBubbleImageView.clipsToBounds = true
 
         let scoreColumn = UIStackView(arrangedSubviews: [scoreCaptionLabel, scoreValueLabel])
@@ -97,22 +103,22 @@ final class GameHUDView: UIView {
         statsRow.distribution = .fillEqually
         statsRow.translatesAutoresizingMaskIntoConstraints = false
 
-        addSubview(glassPanel)
-        addSubview(statsRow)
+        addSubview(card)
+        card.contentView.addSubview(statsRow)
 
         NSLayoutConstraint.activate([
-            glassPanel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            glassPanel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            glassPanel.topAnchor.constraint(equalTo: topAnchor),
-            glassPanel.bottomAnchor.constraint(equalTo: bottomAnchor),
+            card.leadingAnchor.constraint(equalTo: leadingAnchor),
+            card.trailingAnchor.constraint(equalTo: trailingAnchor),
+            card.topAnchor.constraint(equalTo: topAnchor),
+            card.bottomAnchor.constraint(equalTo: bottomAnchor),
 
-            statsRow.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Theme.Metrics.contentPadding),
-            statsRow.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Theme.Metrics.contentPadding),
-            statsRow.topAnchor.constraint(equalTo: topAnchor, constant: Theme.Metrics.spacingMedium),
-            statsRow.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Theme.Metrics.spacingMedium),
+            statsRow.leadingAnchor.constraint(equalTo: card.contentView.leadingAnchor),
+            statsRow.trailingAnchor.constraint(equalTo: card.contentView.trailingAnchor),
+            statsRow.topAnchor.constraint(equalTo: card.contentView.topAnchor),
+            statsRow.bottomAnchor.constraint(equalTo: card.contentView.bottomAnchor),
 
-            nextBubbleImageView.widthAnchor.constraint(equalToConstant: 32),
-            nextBubbleImageView.heightAnchor.constraint(equalToConstant: 32),
+            nextBubbleImageView.widthAnchor.constraint(equalToConstant: Theme.Typography.HUD.nextBubbleSize),
+            nextBubbleImageView.heightAnchor.constraint(equalToConstant: Theme.Typography.HUD.nextBubbleSize),
         ])
     }
 
