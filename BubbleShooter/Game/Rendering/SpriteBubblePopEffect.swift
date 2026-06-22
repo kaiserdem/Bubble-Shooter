@@ -12,6 +12,8 @@ enum SpriteBubblePopEffect {
     private static let cascadeStep: TimeInterval = 0.02
     /// Explosion art includes outward splashes beyond the bubble circle.
     private static let visualScale: CGFloat = 1.28
+    /// Grows to 1.5× base size while frames 1–2 play.
+    private static let peakScaleFactor: CGFloat = 1.5
 
     static func playGroup(
         _ specs: [BubblePopSpec],
@@ -55,15 +57,19 @@ enum SpriteBubblePopEffect {
         let node = SKSpriteNode(texture: textures[0], size: CGSize(width: visualSize, height: visualSize))
         node.position = position
         node.zPosition = 30
+        node.setScale(1)
         parent.addChild(node)
 
-        var actions: [SKAction] = [SKAction.wait(forDuration: delay)]
-        if textures.count == 1 {
-            actions.append(SKAction.wait(forDuration: frameDuration))
-        } else {
-            actions.append(SKAction.animate(with: textures, timePerFrame: frameDuration))
-        }
-        actions.append(SKAction.removeFromParent())
-        node.run(SKAction.sequence(actions))
+        let frameCount = textures.count
+        let playDuration = TimeInterval(frameCount) * frameDuration
+        let frameAnimation = SKAction.animate(with: textures, timePerFrame: frameDuration)
+        let scaleUp = SKAction.scale(to: peakScaleFactor, duration: playDuration)
+        scaleUp.timingMode = .easeOut
+
+        node.run(SKAction.sequence([
+            SKAction.wait(forDuration: delay),
+            SKAction.group([frameAnimation, scaleUp]),
+            SKAction.removeFromParent()
+        ]))
     }
 }

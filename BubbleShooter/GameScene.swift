@@ -18,8 +18,7 @@ final class GameScene: SKScene {
     private var hexLayout: HexLayout?
 
     private var gridRenderer: GridRenderer?
-    private var cannonRenderer: CannonRenderer?
-    private var aimGuide = AimGuideNode()
+    private var cannonPivot: CannonAimPivot?
     private var aimController: AimController?
     private var hudLabel: SKLabelNode?
 
@@ -52,7 +51,6 @@ final class GameScene: SKScene {
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
         isLayoutReady = true
         BubbleTextureCache.preload()
-        addChild(aimGuide)
         applyLayout()
     }
 
@@ -72,7 +70,7 @@ private extension GameScene {
         guard let grid, let gameplayParameters, size.width > 1, size.height > 1 else { return }
 
         gridRenderer?.container.removeFromParent()
-        cannonRenderer?.removeFromParent()
+        cannonPivot?.removeFromParent()
 
         let layout = HexLayout(
             sceneSize: size,
@@ -89,22 +87,17 @@ private extension GameScene {
         gridRenderer = renderer
 
         let cannonPosition = CGPoint(x: 0, y: -size.height / 2 + 112)
-        let launchOrigin = CGPoint(
-            x: cannonPosition.x,
-            y: cannonPosition.y + layout.bubbleVisualDiameter * 0.55
-        )
-        let cannon = CannonRenderer(
+        let pivot = CannonAimPivot(
             cannonPosition: cannonPosition,
             bubbleDiameter: layout.bubbleVisualDiameter
         )
         if let shotQueue {
-            cannon.update(current: shotQueue.current, next: shotQueue.next)
+            pivot.cannon.update(current: shotQueue.current, next: shotQueue.next)
         }
-        addChild(cannon)
-        cannonRenderer = cannon
+        addChild(pivot)
+        cannonPivot = pivot
 
-        aimController = AimController(cannonPosition: launchOrigin)
-        bringNodeToFront(aimGuide)
+        aimController = AimController(cannonPosition: cannonPosition)
 
         updateHUD(grid: grid, parameters: gameplayParameters)
     }
@@ -156,6 +149,16 @@ private extension GameScene {
         node.removeFromParent()
         addChild(node)
     }
+
+    func shotRay(toward scenePoint: CGPoint) -> ShotRay? {
+        guard let aimController, let cannonPivot else { return nil }
+        let aimAngle = aimController.clampedAngle(toward: scenePoint)
+        cannonPivot.setAimAngle(aimAngle)
+        return ShotRay(
+            origin: cannonPivot.launchOrigin(in: self),
+            direction: aimController.unitDirection(for: aimAngle)
+        )
+    }
 }
 
 // MARK: - Aiming & Shooting
@@ -164,14 +167,14 @@ private extension GameScene {
 
     func updateAim(toward scenePoint: CGPoint) {
         guard !isShooting,
-              let aimController,
               let layout = hexLayout,
               let grid,
-              let gameplayParameters else { return }
+              let gameplayParameters,
+              let ray = shotRay(toward: scenePoint) else { return }
 
         let configuration = gameplayParameters.gridConfiguration
         let path = simulatedPath(
-            from: aimController.shotRay(toward: scenePoint),
+            from: ray,
             layout: layout,
             grid: grid,
             configuration: configuration
@@ -182,20 +185,20 @@ private extension GameScene {
             layout: layout,
             configuration: configuration
         )
-        aimGuide.update(path: previewPath)
+        cannonPivot?.updateAimGuide(path: previewPath, in: self)
     }
 
     func fireShot(toward scenePoint: CGPoint) {
         guard !isShooting,
-              let aimController,
               let layout = hexLayout,
               let grid,
               let gameplayParameters,
-              let shotQueue else { return }
+              let shotQueue,
+              let ray = shotRay(toward: scenePoint) else { return }
 
         let configuration = gameplayParameters.gridConfiguration
         let path = simulatedPath(
-            from: aimController.shotRay(toward: scenePoint),
+            from: ray,
             layout: layout,
             grid: grid,
             configuration: configuration
@@ -208,11 +211,11 @@ private extension GameScene {
         )
 
         isShooting = true
-        aimGuide.update(path: nil)
+        cannonPivot?.hideAimGuide()
         pendingShotPath = path
 
         let shotBubble = shotQueue.current
-        cannonRenderer?.hideCurrentBubble()
+        cannonPivot?.cannon.hideCurrentBubble()
 
         flyingBubble = FlyingBubbleNode.animate(
             bubble: shotBubble,
@@ -294,8 +297,8 @@ private extension GameScene {
         if var queue = shotQueue, let random {
             queue.advance(random: random, colorCount: colorCount)
             shotQueue = queue
-            cannonRenderer?.update(current: queue.current, next: queue.next)
-            cannonRenderer?.showCurrentBubble()
+            cannonPivot?.cannon.update(current: queue.current, next: queue.next)
+            cannonPivot?.cannon.showCurrentBubble()
         }
     }
 
@@ -373,6 +376,6 @@ extension GameScene {
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        aimGuide.update(path: nil)
+        cannonPivot?.hideAimGuide()
     }
 }

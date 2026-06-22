@@ -13,10 +13,10 @@ final class BubbleNode: SKNode {
     /// Filled circle diameter relative to sprite — sits inside artwork padding.
     private static let groundDiameterRatio: CGFloat = 0.86
 
-    init(bubble: Bubble, diameter: CGFloat) {
+    init(bubble: Bubble, diameter: CGFloat, zPosition: CGFloat = 10) {
         self.bubble = bubble
         super.init()
-        zPosition = 10
+        self.zPosition = zPosition
         isUserInteractionEnabled = false
 
         let groundDiameter = diameter * Self.groundDiameterRatio

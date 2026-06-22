@@ -5,33 +5,47 @@
 
 import SpriteKit
 
-/// Cannon base, current bubble, and next-bubble preview.
+/// Cannon sprite (`gun-1`), current bubble in the diamond port, next-bubble preview.
 final class CannonRenderer: SKNode {
 
-    private let baseNode = SKShapeNode()
+    private static let gunSpriteName = "gun-1"
+    /// Diamond center height as a fraction of gun sprite height (from bottom anchor).
+    private static let diamondCenterRatio: CGFloat = 0.82
+    private static let gunWidthRatio: CGFloat = 2.35 * 1.6 * 1.1
+    private static let gunVerticalOffset: CGFloat = -40
+    private static let bubbleVerticalOffset: CGFloat = -65
+
+    private let gunNode: SKSpriteNode
     private let bubbleDiameter: CGFloat
+    private let gunHeight: CGFloat
+
+    private(set) var launchBubbleOffsetY: CGFloat
+
     private var currentBubbleNode: BubbleNode?
     private var nextBubbleNode: BubbleNode?
 
     init(cannonPosition: CGPoint, bubbleDiameter: CGFloat) {
         self.bubbleDiameter = bubbleDiameter
+
+        let texture = SKTexture(imageNamed: Self.gunSpriteName)
+        let textureSize = texture.size()
+        let aspect = textureSize.height / max(textureSize.width, 1)
+        let gunWidth = bubbleDiameter * Self.gunWidthRatio
+        let gunHeight = gunWidth * aspect
+        self.gunHeight = gunHeight
+        self.launchBubbleOffsetY = Self.gunVerticalOffset
+            + gunHeight * Self.diamondCenterRatio
+            + Self.bubbleVerticalOffset
+
+        gunNode = SKSpriteNode(texture: texture, size: CGSize(width: gunWidth, height: gunHeight))
+        gunNode.anchorPoint = CGPoint(x: 0.5, y: 0)
+        gunNode.position = CGPoint(x: 0, y: Self.gunVerticalOffset)
+        gunNode.zPosition = 10
+
         super.init()
         position = cannonPosition
         zPosition = 20
-
-        let baseWidth = bubbleDiameter * 1.6
-        let baseHeight = bubbleDiameter * 0.45
-        baseNode.path = CGPath(
-            roundedRect: CGRect(x: -baseWidth / 2, y: -baseHeight / 2, width: baseWidth, height: baseHeight),
-            cornerWidth: baseHeight / 2,
-            cornerHeight: baseHeight / 2,
-            transform: nil
-        )
-        baseNode.fillColor = SKColor(cgColor: Theme.Background.elevated.cgColor)
-        baseNode.strokeColor = SKColor(white: 1, alpha: 0.25)
-        baseNode.lineWidth = 1.5
-        baseNode.zPosition = 0
-        addChild(baseNode)
+        addChild(gunNode)
     }
 
     @available(*, unavailable)
@@ -43,18 +57,19 @@ final class CannonRenderer: SKNode {
         currentBubbleNode?.removeFromParent()
         nextBubbleNode?.removeFromParent()
 
-        let currentNode = BubbleNode(bubble: current, diameter: bubbleDiameter)
-        currentNode.position = CGPoint(x: 0, y: bubbleDiameter * 0.55)
-        currentNode.zPosition = 2
-        addChild(currentNode)
+        let currentNode = BubbleNode(bubble: current, diameter: bubbleDiameter, zPosition: -1)
+        currentNode.position = CGPoint(x: 0, y: launchBubbleOffsetY)
         currentBubbleNode = currentNode
 
         let nextDiameter = bubbleDiameter * 0.55
-        let nextNode = BubbleNode(bubble: next, diameter: nextDiameter)
-        nextNode.position = CGPoint(x: -bubbleDiameter * 1.15, y: bubbleDiameter * 0.2)
-        nextNode.zPosition = 1
-        addChild(nextNode)
+        let nextNode = BubbleNode(bubble: next, diameter: nextDiameter, zPosition: -1)
+        nextNode.position = CGPoint(
+            x: -bubbleDiameter * 1.2,
+            y: gunHeight * 0.28
+        )
         nextBubbleNode = nextNode
+
+        placeBubblesBelowGun()
     }
 
     func hideCurrentBubble() {
@@ -63,5 +78,21 @@ final class CannonRenderer: SKNode {
 
     func showCurrentBubble() {
         currentBubbleNode?.isHidden = false
+    }
+
+    // MARK: - Private
+
+    /// Bubbles sit under the gun sprite so they show through the diamond port.
+    private func placeBubblesBelowGun() {
+        gunNode.removeFromParent()
+
+        if let currentBubbleNode {
+            addChild(currentBubbleNode)
+        }
+        if let nextBubbleNode {
+            addChild(nextBubbleNode)
+        }
+
+        addChild(gunNode)
     }
 }
