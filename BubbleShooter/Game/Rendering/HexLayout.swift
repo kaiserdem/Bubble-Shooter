@@ -10,20 +10,21 @@ struct HexLayout: Equatable, Sendable {
 
     /// Center-to-center distance between neighbors in the same row.
     let gridPitch: CGFloat
-    /// Rendered sprite size — slightly smaller than pitch to avoid artwork glow overlap.
+    /// Circular sprite diameter — matches pitch so neighbors touch horizontally.
     let bubbleVisualDiameter: CGFloat
     let topCenter: CGPoint
 
-    private static let visualDiameterRatio: CGFloat = 0.93
+    /// Looser than tight hex packing (`√3/2`) — artwork extends past the logical circle vertically.
+    private static let verticalRowStepRatio: CGFloat = 0.97
 
-    private var rowStep: CGFloat { gridPitch * sqrt(3) / 2 }
+    private var rowStep: CGFloat { gridPitch * Self.verticalRowStepRatio }
 
     init(sceneSize: CGSize, columnCount: Int, topPadding: CGFloat = 96) {
         let horizontalPadding: CGFloat = 24
         let availableWidth = sceneSize.width - horizontalPadding * 2
         let pitch = floor(availableWidth / CGFloat(columnCount))
         gridPitch = pitch
-        bubbleVisualDiameter = floor(pitch * Self.visualDiameterRatio)
+        bubbleVisualDiameter = pitch
         topCenter = CGPoint(x: 0, y: sceneSize.height / 2 - topPadding)
     }
 

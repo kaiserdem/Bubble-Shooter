@@ -28,7 +28,8 @@ final class BubbleNode: SKNode {
         addChild(ground)
 
         let texture = BubbleTextureCache.texture(for: bubble.color)
-        let sprite = SKSpriteNode(texture: texture, color: .clear, size: CGSize(width: diameter, height: diameter))
+        let size = CGSize(width: diameter, height: diameter)
+        let sprite = SKSpriteNode(texture: texture, color: .clear, size: size)
         sprite.colorBlendFactor = 0
         sprite.zPosition = 1
         addChild(sprite)
