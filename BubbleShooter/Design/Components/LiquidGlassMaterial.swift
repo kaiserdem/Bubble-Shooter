@@ -10,6 +10,8 @@ enum LiquidGlassMaterial {
 
     case card
     case panel
+    /// Match playfield — milkier glass so bubbles read clearly on wallpaper.
+    case playfield
     case overlay
     /// Compact navigation controls on busy wallpapers (e.g. Back).
     case navigation
@@ -27,6 +29,12 @@ enum LiquidGlassMaterial {
     }
 
     var usesLegacyTintOverlay: Bool {
+        showsTintOverlay
+    }
+
+    /// Tint layer on top of blur — always on for playfield; legacy-only for other styles.
+    var showsTintOverlay: Bool {
+        if self == .playfield { return true }
         if #available(iOS 26.0, *) {
             return false
         }
@@ -34,11 +42,17 @@ enum LiquidGlassMaterial {
     }
 
     var legacyTintColor: UIColor {
+        tintOverlayColor
+    }
+
+    var tintOverlayColor: UIColor {
         switch self {
         case .card:
             Theme.Background.deep.withAlphaComponent(0.22)
         case .panel:
             UIColor.white.withAlphaComponent(0.05)
+        case .playfield:
+            UIColor.white.withAlphaComponent(0.10)
         case .overlay:
             Theme.Background.deep.withAlphaComponent(0.28)
         case .navigation:
@@ -52,7 +66,7 @@ enum LiquidGlassMaterial {
 
     private var legacyBlurStyle: UIBlurEffect.Style {
         switch self {
-        case .card, .panel:
+        case .card, .panel, .playfield:
             .systemChromeMaterialDark
         case .overlay, .navigation:
             .systemMaterialDark
@@ -67,6 +81,10 @@ enum LiquidGlassMaterial {
         case .panel:
             let effect = UIGlassEffect(style: .clear)
             effect.tintColor = UIColor.white.withAlphaComponent(0.04)
+            return effect
+        case .playfield:
+            let effect = UIGlassEffect(style: .clear)
+            effect.tintColor = UIColor.white.withAlphaComponent(0.07)
             return effect
         case .overlay:
             return UIGlassEffect(style: .regular)

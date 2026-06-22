@@ -11,13 +11,21 @@ final class GlassCardView: UIView {
   /// Host for screen content — lives inside the visual effect view on iOS 26.
   let contentView = UIView()
 
-  private let material: LiquidGlassMaterial = .card
+  private let material: LiquidGlassMaterial
   private let roundedContainer = UIView()
   private let effectView = UIVisualEffectView()
   private let tintOverlay = UIView()
   private let borderLayer = CAShapeLayer()
 
+  init(material: LiquidGlassMaterial = .card) {
+    self.material = material
+    super.init(frame: .zero)
+    configure()
+    applyMaterial()
+  }
+
   override init(frame: CGRect) {
+    self.material = .card
     super.init(frame: frame)
     configure()
     applyMaterial()
@@ -40,7 +48,7 @@ final class GlassCardView: UIView {
       effectView.layer.cornerRadius = radius
     }
 
-    if material.usesLegacyTintOverlay {
+    if material.showsTintOverlay {
       tintOverlay.layer.cornerRadius = radius
     }
 
@@ -123,8 +131,8 @@ final class GlassCardView: UIView {
     effectView.effect = material.makeEffect()
     effectView.alpha = material.legacyBlurAlpha
 
-    let usesTint = material.usesLegacyTintOverlay
+    let usesTint = material.showsTintOverlay
     tintOverlay.isHidden = !usesTint
-    tintOverlay.backgroundColor = material.legacyTintColor
+    tintOverlay.backgroundColor = material.tintOverlayColor
   }
 }

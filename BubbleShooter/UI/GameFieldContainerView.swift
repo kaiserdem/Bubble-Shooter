@@ -9,7 +9,7 @@ import SpriteKit
 /// Bordered playfield frame — lobby-style glass card over the match wallpaper, bubbles in `gameView`.
 final class GameFieldContainerView: UIView {
 
-    private let card = GlassCardView()
+    private let card = GlassCardView(material: .playfield)
 
     let gameView: SKView = {
         let view = SKView()

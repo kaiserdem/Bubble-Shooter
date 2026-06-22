@@ -59,8 +59,9 @@ enum CannonSkin: String, CaseIterable, Codable, Sendable {
     /// Extra launch-port Y for non-default gun art (SpriteKit points, +Y = up).
     var loadedBubbleYOffset: CGFloat {
         switch self {
-        case .standard: 0
-        case .gold, .nebula: 5
+        case .standard: -2
+        case .gold: 12
+        case .nebula: 14
         }
     }
 }
