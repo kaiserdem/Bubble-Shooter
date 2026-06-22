@@ -20,6 +20,9 @@ final class GameViewController: UIViewController {
     private var skillzService: SkillzProviding = MockSkillzService.shared
     private var gameScene: GameScene?
     private var lobbyView: SandboxLobbyView?
+    #if DEBUG
+    private var designPreviewController: DesignPreviewViewController?
+    #endif
 
     // MARK: - Lifecycle
 
@@ -123,6 +126,9 @@ private extension GameViewController {
                 matchSeed: "determinism-test-seed"
             )
         }
+        lobby.onOpenDesignPreview = { [weak self] in
+            self?.showDesignPreview()
+        }
 
         lobby.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(lobby)
@@ -140,80 +146,38 @@ private extension GameViewController {
         lobbyView?.removeFromSuperview()
         lobbyView = nil
     }
-}
 
-// MARK: - Sandbox Lobby (DEBUG only)
+    #if DEBUG
+    func showDesignPreview() {
+        guard designPreviewController == nil else { return }
 
-#if DEBUG
-private final class SandboxLobbyView: UIView {
+        hideSandboxLobby()
 
-    var onLaunchSkillz: (() -> Void)?
-    var onStartSandboxMatch: (() -> Void)?
-    var onStartDeterminismTest: (() -> Void)?
+        let preview = DesignPreviewViewController()
+        preview.onClose = { [weak self] in
+            self?.hideDesignPreview()
+            self?.showSandboxLobbyIfNeeded()
+        }
 
-    private let stackView = UIStackView()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        backgroundColor = UIColor.black.withAlphaComponent(0.55)
-        configureLayout()
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func configureLayout() {
-        stackView.axis = .vertical
-        stackView.spacing = 16
-        stackView.alignment = .center
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-
-        let title = makeLabel("BubbleShooter — Sandbox")
-        title.font = .boldSystemFont(ofSize: 22)
-
-        let subtitle = makeLabel("Skillz SDK не підключено — використовуйте мок")
-        subtitle.font = .preferredFont(forTextStyle: .footnote)
-        subtitle.textColor = .secondaryLabel
-        subtitle.numberOfLines = 0
-        subtitle.textAlignment = .center
-
-        stackView.addArrangedSubview(title)
-        stackView.addArrangedSubview(subtitle)
-        stackView.addArrangedSubview(makeButton("Launch Skillz (mock)", action: #selector(launchTapped)))
-        stackView.addArrangedSubview(makeButton("Start Sandbox Match", action: #selector(matchTapped)))
-        stackView.addArrangedSubview(makeButton("Determinism Test Match", action: #selector(determinismTapped)))
-
-        addSubview(stackView)
+        addChild(preview)
+        preview.view.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(preview.view)
         NSLayoutConstraint.activate([
-            stackView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            stackView.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 24),
-            stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -24),
+            preview.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            preview.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            preview.view.topAnchor.constraint(equalTo: view.topAnchor),
+            preview.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        preview.didMove(toParent: self)
+        designPreviewController = preview
     }
 
-    private func makeLabel(_ text: String) -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.textColor = .label
-        return label
+    func hideDesignPreview() {
+        guard let preview = designPreviewController else { return }
+        preview.willMove(toParent: nil)
+        preview.view.removeFromSuperview()
+        preview.removeFromParent()
+        designPreviewController = nil
     }
-
-    private func makeButton(_ title: String, action: Selector) -> UIButton {
-        var configuration = UIButton.Configuration.filled()
-        configuration.title = title
-        configuration.baseBackgroundColor = .systemBlue
-        configuration.cornerStyle = .medium
-
-        let button = UIButton(configuration: configuration)
-        button.addTarget(self, action: action, for: .touchUpInside)
-        return button
-    }
-
-    @objc private func launchTapped() { onLaunchSkillz?() }
-    @objc private func matchTapped() { onStartSandboxMatch?() }
-    @objc private func determinismTapped() { onStartDeterminismTest?() }
+    #endif
 }
-#endif

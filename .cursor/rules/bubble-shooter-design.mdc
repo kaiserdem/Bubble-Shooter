@@ -1,0 +1,33 @@
+---
+description: Cosmic Pop design system — кольори, компоненти UI, заборона хардкоду стилів. Для UI/Design файлів.
+globs: BubbleShooter/Design/**/*.swift,BubbleShooter/UI/**/*.swift,BubbleShooter/Game/**/Rendering/**/*.swift,BubbleShooter/GameScene.swift
+alwaysApply: false
+---
+
+# BubbleShooter — Design System (Cosmic Pop)
+
+## Джерело істини
+
+- Код: `BubbleShooter/Design/Theme.swift`
+- Документація: `.cursor/specs/design/visual_style_guide.md`
+- Skill: `.cursor/skills/bubble-shooter-design/SKILL.md`
+
+## Обов'язково
+
+1. Кольори лише з `Theme` — не хардкодити hex у view/scene
+2. UIKit меню: `ArcadeButton`, `ArcadeLabel`, `GlassCardView`, `GradientBackgroundView`
+3. Бульбашки: `Theme.Bubble` (індекс = колір у моделі)
+4. Кнопки: `primary` = головна дія, `ghost` = другорядна, `danger` = abort
+
+## Нові UI-екрани
+
+```
+GradientBackgroundView (fullscreen)
+  └── GlassCardView або custom layout
+        └── ArcadeLabel + ArcadeButton + BadgeView
+```
+
+## SpriteKit
+
+- `Theme.SK.*` для фону і тексту
+- Нові SK-вузли — у `Game/Rendering/`, стилізувати через Theme

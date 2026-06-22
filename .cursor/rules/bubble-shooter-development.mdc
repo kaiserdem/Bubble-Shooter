@@ -8,6 +8,7 @@ alwaysApply: true
 ## Джерело істини
 
 Перед реалізацією фіч читай `.cursor/specs/game/bubble_shooter_skillz.md`.
+Для UI/стилю — `.cursor/specs/design/visual_style_guide.md` та skill `bubble-shooter-design`.
 Для покрокового workflow — skill `.cursor/skills/bubble-shooter-development/SKILL.md`.
 
 ## Обов'язкові принципи

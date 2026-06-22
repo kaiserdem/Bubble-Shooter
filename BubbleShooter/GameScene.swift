@@ -27,7 +27,7 @@ final class GameScene: SKScene {
     // MARK: - Scene Lifecycle
 
     override func didMove(to view: SKView) {
-        backgroundColor = SKColor(red: 0.08, green: 0.10, blue: 0.18, alpha: 1.0)
+        backgroundColor = Theme.SK.backgroundDeep
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
     }
 
@@ -60,7 +60,7 @@ private extension GameScene {
             fontSize: 16,
             position: CGPoint(x: 0, y: size.height * 0.18)
         )
-        seedLabel.fontColor = .lightGray
+        seedLabel.fontColor = Theme.SK.textPrimary.withAlphaComponent(0.65)
 
         let sampleValues = (0..<5).map { _ in random.nextInt(upperBound: 100) }
         let rngLabel = makeLabel(
@@ -68,14 +68,14 @@ private extension GameScene {
             fontSize: 14,
             position: CGPoint(x: 0, y: size.height * 0.10)
         )
-        rngLabel.fontColor = .cyan
+        rngLabel.fontColor = Theme.SK.accentCyan
 
         debugLabel = makeLabel(
             text: "Tap to roll next value",
             fontSize: 14,
             position: CGPoint(x: 0, y: -size.height * 0.30)
         )
-        debugLabel?.fontColor = .white
+        debugLabel?.fontColor = Theme.SK.textPrimary
 
         addChild(title)
         addChild(seedLabel)
@@ -86,9 +86,10 @@ private extension GameScene {
     }
 
     func makeLabel(text: String, fontSize: CGFloat, position: CGPoint) -> SKLabelNode {
-        let label = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        let label = SKLabelNode(fontNamed: Theme.Typography.skBody(fontSize))
         label.text = text
         label.fontSize = fontSize
+        label.fontColor = Theme.SK.textPrimary
         label.position = position
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center

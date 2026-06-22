@@ -21,3 +21,4 @@
 ## Done
 
 - [x] Крок 1: Foundation (2026-06-22)
+- [x] Design: Cosmic Pop UI kit (Theme, ArcadeButton, GlassCard)
