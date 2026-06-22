@@ -14,12 +14,12 @@ struct BubblePopSpec: Sendable {
 /// Available pop animation variants — switch `BubblePopEffectPlayer.style` to compare.
 enum BubblePopEffectStyle: String, CaseIterable, Sendable {
     case cosmicShatter
-    case jellySquish
+    case supernova
 
     var displayName: String {
         switch self {
         case .cosmicShatter: "Cosmic Shatter"
-        case .jellySquish: "Jelly Squish"
+        case .supernova: "Supernova"
         }
     }
 }
@@ -27,7 +27,7 @@ enum BubblePopEffectStyle: String, CaseIterable, Sendable {
 enum BubblePopEffectPlayer {
 
     /// Active pop animation. Change in sandbox or set before a match.
-    static var style: BubblePopEffectStyle = .jellySquish
+    static var style: BubblePopEffectStyle = .supernova
 
     private static let cascadeStep: TimeInterval = 0.02
 
@@ -38,11 +38,11 @@ enum BubblePopEffectPlayer {
     ) {
         guard !specs.isEmpty else { return }
 
-        let ordered = PopEffectCascade.ordered(specs)
-        for (index, spec) in ordered.enumerated() {
-            let delay = TimeInterval(index) * cascadeStep
-            switch style {
-            case .cosmicShatter:
+        switch style {
+        case .cosmicShatter:
+            let ordered = PopEffectCascade.ordered(specs)
+            for (index, spec) in ordered.enumerated() {
+                let delay = TimeInterval(index) * cascadeStep
                 CosmicShatterPopEffect.play(
                     at: spec.center,
                     color: spec.color,
@@ -50,15 +50,14 @@ enum BubblePopEffectPlayer {
                     delay: delay,
                     in: parent
                 )
-            case .jellySquish:
-                JellySquishPopEffect.play(
-                    at: spec.center,
-                    color: spec.color,
-                    diameter: bubbleDiameter,
-                    delay: delay,
-                    in: parent
-                )
             }
+
+        case .supernova:
+            SupernovaPopEffect.playGroup(
+                specs,
+                bubbleDiameter: bubbleDiameter,
+                in: parent
+            )
         }
     }
 }
