@@ -1,0 +1,37 @@
+---
+description: BubbleShooter Skillz PvP — ТЗ, покрокова розробка, детермінізм. Застосовувати при будь-якій роботі над грою.
+alwaysApply: true
+---
+
+# BubbleShooter — правила розробки
+
+## Джерело істини
+
+Перед реалізацією фіч читай `.cursor/specs/game/bubble_shooter_skillz.md`.
+Для покрокового workflow — skill `.cursor/skills/bubble-shooter-development/SKILL.md`.
+
+## Обов'язкові принципи
+
+1. **Детермінізм**: геймплейний random лише через `DeterministicRandom` / `matchSeed`. Заборонено `Int.random`, `arc4random`, `UUID()` для логіки матчу.
+2. **Один крок за раз**: не реалізовувати кілька кроків з ТЗ одночасно без явного запиту користувача.
+3. **Розділення**: модель і логіка — чистий Swift у `BubbleShooter/Game/`; SpriteKit лише у `Rendering/` та `GameScene`.
+4. **Skillz пізніше**: до Кроку 10 використовувати `MockSkillzService`; не блокувати геймплей відсутністю SDK.
+5. **Мінімальний diff**: не чіпати Skillz/Core файли без потреби; не додавати shop/achievements до завершення Кроку 9.
+
+## Поточний статус
+
+- ✅ Крок 1: фундамент (Skillz mock, RNG, GameScene)
+- ⏳ Наступний: **Крок 2 — модель hex-сітки**
+
+## Структура нових файлів
+
+```
+BubbleShooter/Game/Model/     — Bubble, GridPosition, BubbleGrid
+BubbleShooter/Game/Logic/     — LevelGenerator, MatchFinder, ShotSimulator
+BubbleShooter/Game/Rendering/ — BubbleNode, GridRenderer
+```
+
+## Мова
+
+- Код, коментарі, імена типів — англійською
+- Комунікація з користувачем — українською

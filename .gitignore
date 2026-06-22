@@ -1,0 +1,66 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.swp
+*~.nib
+
+# Xcode user-specific data
+xcuserdata/
+*.xcuserdatad/
+
+# Swift Package Manager
+.build/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+Package.resolved
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Skillz SDK (додайте framework локально, не комітьте бінарники)
+Skillz.framework/
+Skillz.xcframework/
+*.framework/
+*.xcframework/
+
+# Secrets / env
+.env
+.env.*
+*.p12
+*.mobileprovision
+
+# Cursor / IDE (локальний кеш, не проєктні правила)
+.cursor/output/
+.cursor/cache/
+
+# Accio
+Dependencies/
+.accio/
+
+# Code Injection
+iOSInjectionProject/
