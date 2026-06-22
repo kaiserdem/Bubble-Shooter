@@ -15,16 +15,9 @@ enum BubbleColor: Int, CaseIterable, Codable, Sendable {
     case violet
     case rose
 
-    /// Asset name in `Assets.xcassets/Collection1/`.
+    /// Asset name for the active bubble skin pack.
     var spriteName: String {
-        switch self {
-        case .ruby: "Ruby-1"
-        case .amber: "Amber-1"
-        case .lime: "Lime-1"
-        case .aqua: "Aqua-1"
-        case .violet: "Violet-1"
-        case .rose: "Rose-1"
-        }
+        CosmeticSettings.bubbleSkinPack.spriteName(for: self)
     }
 
     /// Pop animation frames in `Assets.xcassets/Expression/`.

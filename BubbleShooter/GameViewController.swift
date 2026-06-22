@@ -28,7 +28,9 @@ final class GameViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = Theme.Background.gradientBottom
         configureSkillz()
+        BackgroundMusicPlayer.shared.playIfEnabled()
         showMainMenuIfNeeded()
     }
 
@@ -46,14 +48,12 @@ final class GameViewController: UIViewController {
 extension GameViewController: SkillzGameDelegate {
 
     func tournamentWillBegin(matchContext: SkillzMatchContext) {
-        hideMainMenu()
-        DispatchQueue.main.async { [weak self] in
-            self?.presentGameScene(with: matchContext)
-        }
+        presentGameScene(with: matchContext)
     }
 
     func skillzWillExit() {
         teardownMatchUI()
+        BackgroundMusicPlayer.shared.playIfEnabled()
         showMainMenuIfNeeded()
     }
 
@@ -87,8 +87,11 @@ private extension GameViewController {
 
         let layout = MatchLayoutView()
         layout.translatesAutoresizingMaskIntoConstraints = false
-        layout.isHidden = true
-        containerView.addSubview(layout)
+        if let menu = mainMenuView {
+            containerView.insertSubview(layout, belowSubview: menu)
+        } else {
+            containerView.addSubview(layout)
+        }
         NSLayoutConstraint.activate([
             layout.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             layout.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
@@ -96,23 +99,6 @@ private extension GameViewController {
             layout.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
         ])
         matchLayoutView = layout
-
-        containerView.layoutIfNeeded()
-        let sceneSize = layout.gameSKView.bounds.size
-        guard sceneSize.width > 1, sceneSize.height > 1 else { return }
-
-        let scene = GameScene(size: sceneSize)
-        scene.scaleMode = .resizeFill
-        scene.configure(with: matchContext)
-
-        gameScene = scene
-        scene.hudDelegate = self
-        layout.gameSKView.presentScene(scene, transition: .crossFade(withDuration: 0.35))
-        setupMatchUI()
-    }
-
-    func setupMatchUI() {
-        guard let containerView = view, let layout = matchLayoutView else { return }
 
         let intro = MatchIntroOverlayView()
         intro.translatesAutoresizingMaskIntoConstraints = false
@@ -136,6 +122,21 @@ private extension GameViewController {
             results.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
         ])
 
+        containerView.layoutIfNeeded()
+        hideMainMenu()
+
+        let sceneSize = layout.gameSKView.bounds.size
+        guard sceneSize.width > 1, sceneSize.height > 1 else { return }
+
+        let scene = GameScene(size: sceneSize)
+        scene.scaleMode = .resizeFill
+        scene.configure(with: matchContext)
+
+        gameScene = scene
+        scene.hudDelegate = self
+        layout.gameSKView.presentScene(scene)
+        scene.previewMatchHUD()
+
         results.onContinue = { [weak self] in
             self?.matchResultsView?.dismiss { [weak self] in
                 MockSkillzService.shared.simulateSkillzExit()
@@ -149,11 +150,7 @@ private extension GameViewController {
         #endif
 
         intro.playCountdown { [weak self] in
-            self?.matchLayoutView?.isHidden = false
             self?.gameScene?.beginMatch()
-            #if DEBUG
-            // Triple-tap HUD still opens results preview.
-            #endif
         }
     }
 

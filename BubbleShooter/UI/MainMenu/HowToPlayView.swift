@@ -5,16 +5,16 @@
 
 import UIKit
 
-/// Rules and tips overlay — shown from the main menu before a match.
-final class HowToPlayView: ModalCardOverlayView {
+/// Full-screen rules and tips — shown from the main menu before a match.
+final class HowToPlayView: LobbyScreenView {
 
-    var onClose: (() -> Void)?
+    private let introLabel = ArcadeLabel(
+        "Quick guide for your first matches and Skillz tournaments.",
+        style: .body
+    )
 
-    private let titleLabel = ArcadeLabel("How to Play", style: .headline)
-    private let closeButton = ArcadeButton(title: "Got it", style: .primary)
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init() {
+        super.init(screenTitle: "How to Play")
         configureContent()
     }
 
@@ -26,41 +26,17 @@ final class HowToPlayView: ModalCardOverlayView {
     // MARK: - Private
 
     private func configureContent() {
-        titleLabel.textAlignment = .center
+        introLabel.textAlignment = .left
+        introLabel.textColor = Theme.Text.secondary
 
-        closeButton.addAction(UIAction { [weak self] _ in
-            self?.onClose?()
-        }, for: .touchUpInside)
-
-        let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.showsVerticalScrollIndicator = false
-
-        let rulesStack = UIStackView()
-        rulesStack.axis = .vertical
-        rulesStack.spacing = Theme.Metrics.spacingMedium
-        rulesStack.translatesAutoresizingMaskIntoConstraints = false
+        scrollStack.addArrangedSubview(introLabel)
+        scrollStack.setCustomSpacing(Theme.Metrics.spacingLarge, after: introLabel)
 
         for rule in Self.rules {
-            rulesStack.addArrangedSubview(RuleRow(icon: rule.icon, title: rule.title, detail: rule.detail))
+            scrollStack.addArrangedSubview(
+                RuleCard(icon: rule.icon, title: rule.title, detail: rule.detail)
+            )
         }
-
-        scrollView.addSubview(rulesStack)
-
-        contentStack.addArrangedSubview(titleLabel)
-        contentStack.addArrangedSubview(scrollView)
-        contentStack.addArrangedSubview(closeButton)
-        contentStack.setCustomSpacing(Theme.Metrics.spacingLarge, after: scrollView)
-
-        NSLayoutConstraint.activate([
-            scrollView.heightAnchor.constraint(lessThanOrEqualToConstant: 320),
-
-            rulesStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            rulesStack.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            rulesStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            rulesStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            rulesStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-        ])
     }
 
     private static let rules: [(icon: String, title: String, detail: String)] = [
@@ -73,9 +49,9 @@ final class HowToPlayView: ModalCardOverlayView {
     ]
 }
 
-// MARK: - RuleRow
+// MARK: - RuleCard
 
-private final class RuleRow: UIView {
+private final class RuleCard: UIView {
 
     init(icon: String, title: String, detail: String) {
         super.init(frame: .zero)
@@ -88,6 +64,11 @@ private final class RuleRow: UIView {
     }
 
     private func configure(icon: String, title: String, detail: String) {
+        backgroundColor = Theme.Surface.fillStrong
+        layer.cornerRadius = Theme.Metrics.cornerRadiusMedium
+        layer.borderWidth = Theme.Metrics.borderWidth
+        layer.borderColor = Theme.Surface.borderSubtle.cgColor
+
         let iconLabel = ArcadeLabel(icon, style: .headline)
         iconLabel.textAlignment = .center
         iconLabel.setContentHuggingPriority(.required, for: .horizontal)
@@ -114,10 +95,10 @@ private final class RuleRow: UIView {
         addSubview(row)
         NSLayoutConstraint.activate([
             iconLabel.widthAnchor.constraint(equalToConstant: 36),
-            row.leadingAnchor.constraint(equalTo: leadingAnchor),
-            row.trailingAnchor.constraint(equalTo: trailingAnchor),
-            row.topAnchor.constraint(equalTo: topAnchor),
-            row.bottomAnchor.constraint(equalTo: bottomAnchor),
+            row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Theme.Metrics.spacingMedium),
+            row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Theme.Metrics.spacingMedium),
+            row.topAnchor.constraint(equalTo: topAnchor, constant: Theme.Metrics.spacingMedium),
+            row.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Theme.Metrics.spacingMedium),
         ])
     }
 }

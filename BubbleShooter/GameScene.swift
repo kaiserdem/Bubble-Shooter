@@ -460,6 +460,23 @@ extension GameScene {
         publishHUD()
     }
 
+    /// Populates HUD before the intro countdown — timer does not tick until `beginMatch()`.
+    func previewMatchHUD() {
+        guard let parameters = gameplayParameters, let shotQueue else { return }
+
+        hudDelegate?.gameScene(
+            self,
+            didUpdateHUD: MatchHUDState(
+                score: 0,
+                timeRemainingSeconds: parameters.timeLimitSeconds,
+                nextBubble: shotQueue.next.color,
+                currentBubble: shotQueue.current.color,
+                isDangerActive: false,
+                canSwap: false
+            )
+        )
+    }
+
     func tickMatch(currentTime: TimeInterval) {
         guard isMatchActive, !isMatchEnded else { return }
         guard var timer = matchTimer else { return }

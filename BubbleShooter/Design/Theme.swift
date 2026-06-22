@@ -24,6 +24,10 @@ enum Theme {
             static let lobby = "lobby background"
             static let game = "game background"
         }
+
+        enum Music {
+            static let background = "81cebf7e45fdef7"
+        }
     }
 
     // MARK: - Backgrounds

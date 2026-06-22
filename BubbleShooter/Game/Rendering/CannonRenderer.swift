@@ -9,7 +9,7 @@ import SpriteKit
 /// Next bubble preview lives in the UIKit HUD (`GameHUDView`).
 final class CannonRenderer: SKNode {
 
-    private static let gunSpriteName = "gun-1"
+    private static var gunSpriteName: String { CosmeticSettings.cannonSkin.spriteName }
     /// Diamond center height as a fraction of gun sprite height (from bottom anchor).
     private static let diamondCenterRatio: CGFloat = 0.82
     private static let gunWidthRatio: CGFloat = 2.35 * 1.6 * 1.1

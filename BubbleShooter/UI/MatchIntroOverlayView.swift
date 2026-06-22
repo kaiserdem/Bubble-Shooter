@@ -5,20 +5,18 @@
 
 import UIKit
 
-/// Fullscreen countdown overlay shown before match input is unlocked.
+/// Full-screen frosted glass overlay with a 3-2-1 countdown before the match starts.
 final class MatchIntroOverlayView: UIView {
 
-    private let backgroundView = GradientBackgroundView()
-    private let dimOverlay = UIView()
-    private let card = GlassCardView()
-    private let messageLabel = ArcadeLabel("GET READY", style: .title)
+    private let glassPanel = GlassPanelView()
+    private let messageLabel = ArcadeLabel("3", style: .title)
 
     private var countdownTimer: Timer?
     private var countdownIndex = 0
     private var completionHandler: (() -> Void)?
 
-    private let countdownSteps = ["GET READY", "3", "2", "1", "GO!"]
-    private let stepDurations: [TimeInterval] = [0.6, 0.7, 0.7, 0.7, 0.5]
+    private let countdownSteps = ["3", "2", "1"]
+    private let stepDuration: TimeInterval = 0.65
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -48,49 +46,36 @@ final class MatchIntroOverlayView: UIView {
     private func configure() {
         backgroundColor = .clear
         isHidden = true
+        isUserInteractionEnabled = true
 
-        backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        dimOverlay.translatesAutoresizingMaskIntoConstraints = false
-        dimOverlay.backgroundColor = Theme.Background.deep.withAlphaComponent(0.55)
+        glassPanel.translatesAutoresizingMaskIntoConstraints = false
+        glassPanel.style = .veil
+        glassPanel.cornerRadius = 0
+        glassPanel.showsBorder = false
 
-        card.translatesAutoresizingMaskIntoConstraints = false
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
+        messageLabel.textAlignment = .center
+        Theme.Text.applyHUDLegibility(to: messageLabel)
 
-        addSubview(backgroundView)
-        addSubview(dimOverlay)
-        addSubview(card)
-        card.contentView.addSubview(messageLabel)
+        addSubview(glassPanel)
+        addSubview(messageLabel)
 
         NSLayoutConstraint.activate([
-            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            backgroundView.topAnchor.constraint(equalTo: topAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            glassPanel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            glassPanel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            glassPanel.topAnchor.constraint(equalTo: topAnchor),
+            glassPanel.bottomAnchor.constraint(equalTo: bottomAnchor),
 
-            dimOverlay.leadingAnchor.constraint(equalTo: leadingAnchor),
-            dimOverlay.trailingAnchor.constraint(equalTo: trailingAnchor),
-            dimOverlay.topAnchor.constraint(equalTo: topAnchor),
-            dimOverlay.bottomAnchor.constraint(equalTo: bottomAnchor),
-
-            card.centerXAnchor.constraint(equalTo: centerXAnchor),
-            card.centerYAnchor.constraint(equalTo: centerYAnchor),
-            card.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 32),
-            card.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -32),
-            card.widthAnchor.constraint(greaterThanOrEqualToConstant: 220),
-
-            messageLabel.centerXAnchor.constraint(equalTo: card.contentView.centerXAnchor),
-            messageLabel.centerYAnchor.constraint(equalTo: card.contentView.centerYAnchor),
-            messageLabel.leadingAnchor.constraint(greaterThanOrEqualTo: card.contentView.leadingAnchor),
-            messageLabel.trailingAnchor.constraint(lessThanOrEqualTo: card.contentView.trailingAnchor),
-            card.heightAnchor.constraint(greaterThanOrEqualToConstant: 120),
+            messageLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            messageLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            messageLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 32),
+            messageLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -32),
         ])
     }
 
     private func scheduleNextStep() {
         countdownTimer?.invalidate()
-        let duration = stepDurations[min(countdownIndex, stepDurations.count - 1)]
-
-        countdownTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: stepDuration, repeats: false) { [weak self] _ in
             self?.advanceCountdown()
         }
     }
@@ -108,23 +93,19 @@ final class MatchIntroOverlayView: UIView {
     }
 
     private func showStep(animated: Bool) {
-        let text = countdownSteps[countdownIndex]
-        let isGo = text == "GO!"
-        messageLabel.text = text
-        messageLabel.textColor = isGo ? Theme.Accent.gold : Theme.Text.primary
-        messageLabel.font = isGo
-            ? Theme.Typography.title(36)
-            : (text.count == 1 ? Theme.Typography.title(48) : Theme.Typography.title())
+        messageLabel.text = countdownSteps[countdownIndex]
+        messageLabel.font = Theme.Typography.title(72)
+        Theme.Text.applyHUDLegibility(to: messageLabel)
 
         guard animated else { return }
 
-        messageLabel.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        messageLabel.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
         messageLabel.alpha = 0
         UIView.animate(
             withDuration: 0.28,
             delay: 0,
-            usingSpringWithDamping: 0.72,
-            initialSpringVelocity: 0.4
+            usingSpringWithDamping: 0.7,
+            initialSpringVelocity: 0.5
         ) {
             self.messageLabel.transform = .identity
             self.messageLabel.alpha = 1
@@ -135,7 +116,7 @@ final class MatchIntroOverlayView: UIView {
         countdownTimer?.invalidate()
         countdownTimer = nil
 
-        UIView.animate(withDuration: 0.35, animations: {
+        UIView.animate(withDuration: 0.28, animations: {
             self.alpha = 0
         }, completion: { _ in
             self.isHidden = true

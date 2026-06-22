@@ -5,7 +5,7 @@
 
 import UIKit
 
-/// Hosts the main menu and its modal children — keeps pre-game navigation out of `GameViewController`.
+/// Hosts the main menu and full-screen pre-game screens.
 final class MainMenuContainerView: UIView {
 
     var onPlay: (() -> Void)?
@@ -40,25 +40,40 @@ final class MainMenuContainerView: UIView {
             ])
         }
 
+        bringSubviewToFront(mainMenu)
+
         mainMenu.onPlay = { [weak self] in
             self?.onPlay?()
         }
 
         mainMenu.onHowToPlay = { [weak self] in
-            self?.howToPlay.present()
+            self?.openScreen(self?.howToPlay)
         }
 
         mainMenu.onSettings = { [weak self] in
-            self?.settings.reloadFromStorage()
-            self?.settings.present()
+            self?.openScreen(self?.settings)
         }
 
-        howToPlay.onClose = { [weak self] in
-            self?.howToPlay.dismiss()
+        howToPlay.onBack = { [weak self] in
+            self?.closeScreen(self?.howToPlay)
         }
 
-        settings.onClose = { [weak self] in
-            self?.settings.dismiss()
+        settings.onBack = { [weak self] in
+            self?.closeScreen(self?.settings)
+        }
+    }
+
+    private func openScreen(_ screen: LobbyScreenView?) {
+        guard let screen else { return }
+        layoutIfNeeded()
+        bringSubviewToFront(screen)
+        screen.present()
+    }
+
+    private func closeScreen(_ screen: LobbyScreenView?) {
+        screen?.dismiss { [weak self] in
+            guard let self else { return }
+            self.bringSubviewToFront(self.mainMenu)
         }
     }
 }

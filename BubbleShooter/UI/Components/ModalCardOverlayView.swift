@@ -25,6 +25,7 @@ class ModalCardOverlayView: UIView {
 
     func present(animated: Bool = true) {
         isHidden = false
+        isUserInteractionEnabled = true
         guard animated else {
             alpha = 1
             card.transform = .identity
@@ -45,9 +46,16 @@ class ModalCardOverlayView: UIView {
     }
 
     func dismiss(animated: Bool = true, completion: (() -> Void)? = nil) {
-        guard animated else {
-            isHidden = true
+        let finish = {
+            self.isHidden = true
+            self.isUserInteractionEnabled = false
+            self.card.transform = .identity
             completion?()
+        }
+
+        guard animated else {
+            alpha = 0
+            finish()
             return
         }
 
@@ -55,22 +63,27 @@ class ModalCardOverlayView: UIView {
             self.alpha = 0
             self.card.transform = CGAffineTransform(scaleX: 0.94, y: 0.94)
         }, completion: { _ in
-            self.isHidden = true
-            self.card.transform = .identity
-            completion?()
+            finish()
         })
+    }
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard !isHidden, isUserInteractionEnabled, alpha > 0.01 else { return nil }
+        return super.hitTest(point, with: event)
     }
 
     // MARK: - Private
 
     private func configureChrome() {
         isHidden = true
+        isUserInteractionEnabled = false
         translatesAutoresizingMaskIntoConstraints = false
 
         dimView.translatesAutoresizingMaskIntoConstraints = false
         dimView.backgroundColor = UIColor.black.withAlphaComponent(0.45)
 
         card.translatesAutoresizingMaskIntoConstraints = false
+        card.isUserInteractionEnabled = true
 
         contentStack.axis = .vertical
         contentStack.spacing = Theme.Metrics.spacingMedium

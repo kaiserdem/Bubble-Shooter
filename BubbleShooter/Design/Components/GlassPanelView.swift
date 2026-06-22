@@ -8,8 +8,23 @@ import UIKit
 /// Frosted glass chrome — blurs content behind the panel (e.g. match wallpaper).
 final class GlassPanelView: UIView {
 
+    enum Style {
+        /// Playfield and HUD blocks — stronger frost.
+        case panel
+        /// Full-screen overlays — lighter veil so the wallpaper stays readable.
+        case veil
+    }
+
+    var style: Style = .panel {
+        didSet { applyStyle() }
+    }
+
     var cornerRadius: CGFloat = Theme.Metrics.cornerRadiusMedium {
         didSet { setNeedsLayout() }
+    }
+
+    var showsBorder: Bool = true {
+        didSet { borderLayer.isHidden = !showsBorder }
     }
 
     private let blurView: UIVisualEffectView = {
@@ -77,5 +92,20 @@ final class GlassPanelView: UIView {
         borderLayer.strokeColor = Theme.Surface.border.cgColor
         borderLayer.lineWidth = Theme.Metrics.borderWidth
         layer.addSublayer(borderLayer)
+
+        applyStyle()
+    }
+
+    private func applyStyle() {
+        switch style {
+        case .panel:
+            blurView.effect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+            blurView.alpha = 1
+            tintOverlay.backgroundColor = Theme.Surface.fill
+        case .veil:
+            blurView.effect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+            blurView.alpha = 0.38
+            tintOverlay.backgroundColor = UIColor.white.withAlphaComponent(0.06)
+        }
     }
 }
