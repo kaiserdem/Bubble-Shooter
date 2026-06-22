@@ -10,8 +10,9 @@ final class MatchResultsView: UIView {
 
     var onContinue: (() -> Void)?
 
-    private let dimOverlay = UIView()
-    private let card = GlassCardView()
+    private let backdropBlur = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))
+    private let backdropTint = UIView()
+    private let cardPanel = UIView()
     private let titleLabel = ArcadeLabel("MATCH COMPLETE", style: .headline)
     private let scoreLabel = ArcadeLabel("0", style: .title)
     private let newBestBadge = BadgeView(text: "NEW BEST", tint: Theme.Accent.gold)
@@ -89,11 +90,24 @@ final class MatchResultsView: UIView {
         isHidden = true
         backgroundColor = .clear
 
-        dimOverlay.backgroundColor = Theme.Background.deep.withAlphaComponent(0.90)
-        dimOverlay.translatesAutoresizingMaskIntoConstraints = false
+        backdropBlur.translatesAutoresizingMaskIntoConstraints = false
+        backdropBlur.overrideUserInterfaceStyle = .dark
+        backdropBlur.alpha = 0.78
 
-        card.translatesAutoresizingMaskIntoConstraints = false
-        card.contentView.backgroundColor = Theme.Background.deep.withAlphaComponent(0.72)
+        backdropTint.translatesAutoresizingMaskIntoConstraints = false
+        backdropTint.isUserInteractionEnabled = false
+        backdropTint.backgroundColor = Theme.Background.deep.withAlphaComponent(0.20)
+
+        cardPanel.translatesAutoresizingMaskIntoConstraints = false
+        cardPanel.backgroundColor = Theme.Background.elevated.withAlphaComponent(0.97)
+        cardPanel.layer.cornerRadius = Theme.Metrics.cornerRadiusLarge
+        cardPanel.layer.borderWidth = Theme.Metrics.borderWidth
+        cardPanel.layer.borderColor = Theme.Surface.border.cgColor
+        cardPanel.layer.shadowColor = Theme.Surface.shadow.cgColor
+        cardPanel.layer.shadowOpacity = 1
+        cardPanel.layer.shadowRadius = 18
+        cardPanel.layer.shadowOffset = CGSize(width: 0, height: 9)
+
         titleLabel.textAlignment = .center
         scoreLabel.textAlignment = .center
         scoreLabel.textColor = Theme.Accent.gold
@@ -119,26 +133,34 @@ final class MatchResultsView: UIView {
             self?.onContinue?()
         }, for: .touchUpInside)
 
-        addSubview(dimOverlay)
-        addSubview(card)
-        card.contentView.addSubview(contentStack)
+        addSubview(backdropBlur)
+        addSubview(backdropTint)
+        addSubview(cardPanel)
+        cardPanel.addSubview(contentStack)
+
+        let padding = Theme.Metrics.contentPadding
 
         NSLayoutConstraint.activate([
-            dimOverlay.leadingAnchor.constraint(equalTo: leadingAnchor),
-            dimOverlay.trailingAnchor.constraint(equalTo: trailingAnchor),
-            dimOverlay.topAnchor.constraint(equalTo: topAnchor),
-            dimOverlay.bottomAnchor.constraint(equalTo: bottomAnchor),
+            backdropBlur.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backdropBlur.trailingAnchor.constraint(equalTo: trailingAnchor),
+            backdropBlur.topAnchor.constraint(equalTo: topAnchor),
+            backdropBlur.bottomAnchor.constraint(equalTo: bottomAnchor),
 
-            card.centerXAnchor.constraint(equalTo: centerXAnchor),
-            card.centerYAnchor.constraint(equalTo: centerYAnchor),
-            card.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 24),
-            card.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -24),
-            card.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
+            backdropTint.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backdropTint.trailingAnchor.constraint(equalTo: trailingAnchor),
+            backdropTint.topAnchor.constraint(equalTo: topAnchor),
+            backdropTint.bottomAnchor.constraint(equalTo: bottomAnchor),
 
-            contentStack.leadingAnchor.constraint(equalTo: card.contentView.leadingAnchor),
-            contentStack.trailingAnchor.constraint(equalTo: card.contentView.trailingAnchor),
-            contentStack.topAnchor.constraint(equalTo: card.contentView.topAnchor),
-            contentStack.bottomAnchor.constraint(equalTo: card.contentView.bottomAnchor),
+            cardPanel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            cardPanel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            cardPanel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 24),
+            cardPanel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -24),
+            cardPanel.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
+
+            contentStack.leadingAnchor.constraint(equalTo: cardPanel.leadingAnchor, constant: padding),
+            contentStack.trailingAnchor.constraint(equalTo: cardPanel.trailingAnchor, constant: -padding),
+            contentStack.topAnchor.constraint(equalTo: cardPanel.topAnchor, constant: padding),
+            contentStack.bottomAnchor.constraint(equalTo: cardPanel.bottomAnchor, constant: -padding),
 
             continueButton.widthAnchor.constraint(equalTo: contentStack.widthAnchor),
         ])

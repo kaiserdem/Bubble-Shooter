@@ -13,6 +13,8 @@ enum LiquidGlassMaterial {
     /// Match playfield — milkier glass so bubbles read clearly on wallpaper.
     case playfield
     case overlay
+    /// Post-match results card — full-bleed rounded fill, no inset square backdrop.
+    case results
     /// Compact navigation controls on busy wallpapers (e.g. Back).
     case navigation
 
@@ -34,11 +36,14 @@ enum LiquidGlassMaterial {
 
     /// Tint layer on top of blur — always on for playfield; legacy-only for other styles.
     var showsTintOverlay: Bool {
-        if self == .playfield { return true }
-        if #available(iOS 26.0, *) {
-            return false
+        switch self {
+        case .playfield, .results: return true
+        default:
+            if #available(iOS 26.0, *) {
+                return false
+            }
+            return true
         }
-        return true
     }
 
     var legacyTintColor: UIColor {
@@ -55,6 +60,8 @@ enum LiquidGlassMaterial {
             UIColor.white.withAlphaComponent(0.10)
         case .overlay:
             Theme.Background.deep.withAlphaComponent(0.28)
+        case .results:
+            Theme.Background.deep.withAlphaComponent(0.62)
         case .navigation:
             Theme.Background.deep.withAlphaComponent(0.52)
         }
@@ -68,7 +75,7 @@ enum LiquidGlassMaterial {
         switch self {
         case .card, .panel, .playfield:
             .systemChromeMaterialDark
-        case .overlay, .navigation:
+        case .overlay, .navigation, .results:
             .systemMaterialDark
         }
     }
@@ -88,6 +95,10 @@ enum LiquidGlassMaterial {
             return effect
         case .overlay:
             return UIGlassEffect(style: .regular)
+        case .results:
+            let effect = UIGlassEffect(style: .regular)
+            effect.tintColor = Theme.Background.deep.withAlphaComponent(0.42)
+            return effect
         case .navigation:
             let effect = UIGlassEffect(style: .regular)
             effect.tintColor = Theme.Background.deep.withAlphaComponent(0.35)
