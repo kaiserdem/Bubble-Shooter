@@ -8,36 +8,39 @@ import CoreGraphics
 /// Converts hex grid coordinates to scene positions (odd-row offset / honeycomb layout).
 struct HexLayout: Equatable, Sendable {
 
-    /// Center-to-center distance between neighbors in the same row.
+    /// Base center-to-center pitch derived from screen width.
     let gridPitch: CGFloat
-    /// Rendered bubble diameter — slightly smaller than pitch to fit artwork glow.
+    /// Horizontal center distance after tightening.
+    let horizontalPitch: CGFloat
+    /// Rendered bubble diameter.
     let bubbleVisualDiameter: CGFloat
     let topCenter: CGPoint
 
-    /// Vertical distance between row centers for honeycomb nesting (`√3/2 × pitch`).
+    private let rowStep: CGFloat
+
     private static let hexRowStepRatio = sqrt(3) / 2
     private static let visualDiameterRatio: CGFloat = 0.94
-
-    private var rowStep: CGFloat { gridPitch * Self.hexRowStepRatio }
+    /// Pull bubble centers closer on both axes (points).
+    private static let spacingTighten: CGFloat = 3
 
     init(sceneSize: CGSize, columnCount: Int, topPadding: CGFloat = 96) {
         let horizontalPadding: CGFloat = 24
         let availableWidth = sceneSize.width - horizontalPadding * 2
         let pitch = floor(availableWidth / CGFloat(columnCount))
         gridPitch = pitch
-        bubbleVisualDiameter = floor(pitch * Self.visualDiameterRatio)
+        horizontalPitch = pitch - Self.spacingTighten
+        rowStep = pitch * Self.hexRowStepRatio - Self.spacingTighten
+        bubbleVisualDiameter = floor(horizontalPitch * Self.visualDiameterRatio) + Self.spacingTighten
         topCenter = CGPoint(x: 0, y: sceneSize.height / 2 - topPadding)
     }
 
     func center(for position: GridPosition, configuration: GridConfiguration) -> CGPoint {
-        // Anchor all rows to the even-row grid, then shift odd rows by half a pitch
-        // so bubbles nest in the gap between two bubbles above (not directly underneath).
         let evenColumnCount = configuration.columnCount
-        let rowOriginX = -CGFloat(evenColumnCount - 1) * gridPitch / 2
+        let rowOriginX = -CGFloat(evenColumnCount - 1) * horizontalPitch / 2
 
-        var x = rowOriginX + CGFloat(position.col) * gridPitch
+        var x = rowOriginX + CGFloat(position.col) * horizontalPitch
         if !position.row.isMultiple(of: 2) {
-            x += gridPitch / 2
+            x += horizontalPitch / 2
         }
 
         let y = -CGFloat(position.row) * rowStep
