@@ -3,7 +3,10 @@ use_frameworks!
 
 target 'BubbleShooter' do
   # Official Skillz install — pulls Kochava, OpenTelemetry, Rive, AppLovin, etc.
-  pod 'Skillz', '2026.0.71'
+  # Skillz 2025.0.50 matches GeocomplySDKs from skillz_ios_2025050 in Vendor/.
+  # After downloading Skillz 2026 SDK zip, run Scripts/update_geocomply_from_skillz_sdk.sh
+  # and switch back to: pod 'Skillz', '~> 2026.0'
+  pod 'Skillz', '2025.0.50'
 end
 
 post_install do |installer|
