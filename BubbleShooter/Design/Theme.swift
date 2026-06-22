@@ -111,6 +111,9 @@ enum Theme {
         static let contentPadding: CGFloat = 20
         static let buttonHeight: CGFloat = 52
         static let buttonMinWidth: CGFloat = 240
+        static let compactButtonHeight: CGFloat = 40
+        static let compactButtonHorizontalPadding: CGFloat = 16
+        static let compactButtonVerticalPadding: CGFloat = 8
         static let spacingSmall: CGFloat = 8
         static let spacingMedium: CGFloat = 16
         static let spacingLarge: CGFloat = 24
@@ -122,35 +125,35 @@ enum Theme {
         /// PostScript name inside `boinklet.ttf` (Boink LET Plain).
         static let postScriptName = "BoinkLET-Plain"
 
-        static func title(_ size: CGFloat = 28) -> UIFont {
+        static func title(_ size: CGFloat = 30) -> UIFont {
             font(size: size)
         }
 
-        static func headline(_ size: CGFloat = 20) -> UIFont {
+        static func headline(_ size: CGFloat = 22) -> UIFont {
             font(size: size)
         }
 
-        static func body(_ size: CGFloat = 16) -> UIFont {
+        static func body(_ size: CGFloat = 18) -> UIFont {
             font(size: size)
         }
 
-        static func caption(_ size: CGFloat = 13) -> UIFont {
+        static func caption(_ size: CGFloat = 15) -> UIFont {
             font(size: size)
         }
 
         /// In-match HUD typography — larger than menu defaults for legibility on glass.
         enum HUD {
-            static let captionSize: CGFloat = 15
-            static let scoreSize: CGFloat = 34
-            static let timerSize: CGFloat = 26
+            static let captionSize: CGFloat = 17
+            static let scoreSize: CGFloat = 36
+            static let timerSize: CGFloat = 28
             static let nextBubbleSize: CGFloat = 38
         }
 
-        static func skTitle(_ size: CGFloat = 28) -> String {
+        static func skTitle(_ size: CGFloat = 30) -> String {
             postScriptName
         }
 
-        static func skBody(_ size: CGFloat = 16) -> String {
+        static func skBody(_ size: CGFloat = 18) -> String {
             postScriptName
         }
 

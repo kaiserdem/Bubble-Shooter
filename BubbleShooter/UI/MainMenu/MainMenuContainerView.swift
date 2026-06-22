@@ -13,6 +13,7 @@ final class MainMenuContainerView: UIView {
     private let mainMenu = MainMenuView()
     private let howToPlay = HowToPlayView()
     private let settings = SettingsView()
+    private let styles = StylesView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -29,7 +30,7 @@ final class MainMenuContainerView: UIView {
     private func configure() {
         translatesAutoresizingMaskIntoConstraints = false
 
-        for child in [mainMenu, howToPlay, settings] {
+        for child in [mainMenu, howToPlay, settings, styles] {
             child.translatesAutoresizingMaskIntoConstraints = false
             addSubview(child)
             NSLayoutConstraint.activate([
@@ -54,12 +55,22 @@ final class MainMenuContainerView: UIView {
             self?.openScreen(self?.settings)
         }
 
+        mainMenu.onStyles = { [weak self] in
+            guard let self else { return }
+            self.styles.reloadFromStorage()
+            self.openScreen(self.styles)
+        }
+
         howToPlay.onBack = { [weak self] in
-            self?.closeScreen(self?.howToPlay)
+            self?.closeScreen(self?.howToPlay, returnTo: self?.mainMenu)
         }
 
         settings.onBack = { [weak self] in
-            self?.closeScreen(self?.settings)
+            self?.closeScreen(self?.settings, returnTo: self?.mainMenu)
+        }
+
+        styles.onBack = { [weak self] in
+            self?.closeScreen(self?.styles, returnTo: self?.mainMenu)
         }
     }
 
@@ -70,10 +81,18 @@ final class MainMenuContainerView: UIView {
         screen.present()
     }
 
-    private func closeScreen(_ screen: LobbyScreenView?) {
-        screen?.dismiss { [weak self] in
-            guard let self else { return }
-            self.bringSubviewToFront(self.mainMenu)
+    private func closeScreen(
+        _ screen: LobbyScreenView?,
+        returnTo: UIView? = nil,
+        completion: (() -> Void)? = nil
+    ) {
+        screen?.dismiss {
+            completion?()
+            if let returnTo {
+                self.bringSubviewToFront(returnTo)
+            } else if completion == nil {
+                self.bringSubviewToFront(self.mainMenu)
+            }
         }
     }
 }

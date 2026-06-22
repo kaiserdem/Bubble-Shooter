@@ -52,7 +52,7 @@ enum ScoreFloater {
 
         let label = SKLabelNode(fontNamed: Theme.Typography.skTitle())
         label.text = "+\(points)"
-        label.fontSize = 30
+        label.fontSize = 32
         label.fontColor = kind.textColor
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center

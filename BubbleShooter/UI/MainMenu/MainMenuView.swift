@@ -10,6 +10,7 @@ final class MainMenuView: UIView {
 
     var onPlay: (() -> Void)?
     var onHowToPlay: (() -> Void)?
+    var onStyles: (() -> Void)?
     var onSettings: (() -> Void)?
 
     private let backgroundView = ImageBackgroundView(named: Theme.Asset.Background.lobby)
@@ -18,7 +19,8 @@ final class MainMenuView: UIView {
     private let subtitleLabel = ArcadeLabel(Theme.Brand.variant, style: .body)
     private let playButton = ArcadeButton(title: "Play", style: .primary)
     private let howToPlayButton = ArcadeButton(title: "How to Play", style: .secondary)
-    private let settingsButton = ArcadeButton(title: "Settings", style: .ghost)
+    private let stylesButton = ArcadeButton(title: "Styles", style: .gold)
+    private let settingsButton = ArcadeButton(title: "Settings", style: .violet)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -48,16 +50,26 @@ final class MainMenuView: UIView {
             self?.onHowToPlay?()
         }, for: .touchUpInside)
 
+        stylesButton.addAction(UIAction { [weak self] _ in
+            self?.onStyles?()
+        }, for: .touchUpInside)
+
         settingsButton.addAction(UIAction { [weak self] _ in
             self?.onSettings?()
         }, for: .touchUpInside)
+
+        let utilityRow = UIStackView(arrangedSubviews: [stylesButton, settingsButton])
+        utilityRow.axis = .vertical
+        utilityRow.spacing = Theme.Metrics.spacingMedium
+        utilityRow.distribution = .fill
+        utilityRow.alignment = .fill
 
         let stack = UIStackView(arrangedSubviews: [
             titleLabel,
             subtitleLabel,
             playButton,
             howToPlayButton,
-            settingsButton,
+            utilityRow,
         ])
         stack.axis = .vertical
         stack.spacing = Theme.Metrics.spacingMedium

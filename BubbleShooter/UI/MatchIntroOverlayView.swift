@@ -94,7 +94,7 @@ final class MatchIntroOverlayView: UIView {
 
     private func showStep(animated: Bool) {
         messageLabel.text = countdownSteps[countdownIndex]
-        messageLabel.font = Theme.Typography.title(72)
+        messageLabel.font = Theme.Typography.title(74)
         Theme.Text.applyHUDLegibility(to: messageLabel)
 
         guard animated else { return }

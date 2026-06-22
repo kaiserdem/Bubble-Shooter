@@ -30,6 +30,7 @@ final class GameScene: SKScene {
     private var aimController: AimController?
     private var isLayoutReady = false
     private var isShooting = false
+    private var wasDangerWarningActive = false
     private var flyingBubble: BubbleNode?
     private var pendingShotPath: ShotPath?
 
@@ -209,6 +210,8 @@ private extension GameScene {
         cannonPivot?.hideAimGuide()
         pendingShotPath = path
 
+        HapticsPlayer.playLight()
+        SoundEffectsPlayer.playShot()
         cannonPivot?.cannon.beginShot()
 
         flyingBubble = FlyingBubbleNode.animate(
@@ -314,6 +317,8 @@ private extension GameScene {
                 playPopEffect: true
             )
             ScoreFloater.play(points: popPoints, near: popSpecs, kind: .pop, in: self)
+            HapticsPlayer.playLight()
+            SoundEffectsPlayer.playPop()
         } else {
             #if DEBUG
             GridDebugPrinter.logMatchResult(
@@ -344,6 +349,8 @@ private extension GameScene {
                 playPopEffect: false
             )
             ScoreFloater.play(points: dropPoints, near: dropSpecs, kind: .drop, in: self)
+            HapticsPlayer.playLight()
+            SoundEffectsPlayer.playDrop()
         }
 
         self.grid = grid
@@ -456,6 +463,7 @@ extension GameScene {
         isMatchEnded = false
         isMatchActive = true
         lastUpdateTime = 0
+        wasDangerWarningActive = false
         matchTimer = MatchTimer(durationSeconds: parameters.timeLimitSeconds)
         publishHUD()
     }
@@ -491,8 +499,10 @@ extension GameScene {
 
         guard delta > 0 else { return }
 
-        if timer.advance(delta: delta) {
-            matchTimer = timer
+        let didTickSecond = timer.advance(delta: delta)
+        matchTimer = timer
+
+        if didTickSecond {
             publishHUD()
 
             if timer.isExpired {
@@ -516,6 +526,12 @@ extension GameScene {
             configuration: configuration,
             dangerLineY: dangerY
         )
+
+        if isDanger, !wasDangerWarningActive {
+            HapticsPlayer.playLight()
+            SoundEffectsPlayer.playWarning()
+        }
+        wasDangerWarningActive = isDanger
 
         let state = MatchHUDState(
             score: matchScore.total,
@@ -556,6 +572,9 @@ extension GameScene {
 
         isMatchEnded = true
         isMatchActive = false
+
+        HapticsPlayer.playLight()
+        SoundEffectsPlayer.playMatchEnd()
 
         if reason == .timeUp, let timer = matchTimer {
             matchScore.setTimeBonus(remainingSeconds: timer.remainingSeconds)

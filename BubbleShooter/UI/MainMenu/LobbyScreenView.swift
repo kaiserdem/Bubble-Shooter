@@ -14,7 +14,7 @@ class LobbyScreenView: UIView {
     let scrollStack = UIStackView()
 
     private let backgroundView = ImageBackgroundView(named: Theme.Asset.Background.lobby)
-    private let backButton = ArcadeButton(title: "Back", style: .ghost)
+    private let backButton = ArcadeButton(title: "Back", style: .ghost, size: .compact)
     private let titleLabel: ArcadeLabel
     private let card = GlassCardView()
 
@@ -96,7 +96,7 @@ class LobbyScreenView: UIView {
         translatesAutoresizingMaskIntoConstraints = false
 
         titleLabel.textAlignment = .left
-        titleLabel.textColor = Theme.Text.primary
+        Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.primary)
 
         backButton.addAction(UIAction { [weak self] _ in
             self?.onBack?()

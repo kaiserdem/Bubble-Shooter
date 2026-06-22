@@ -89,10 +89,11 @@ final class MatchResultsView: UIView {
         isHidden = true
         backgroundColor = .clear
 
-        dimOverlay.backgroundColor = Theme.Background.deep.withAlphaComponent(0.72)
+        dimOverlay.backgroundColor = Theme.Background.deep.withAlphaComponent(0.90)
         dimOverlay.translatesAutoresizingMaskIntoConstraints = false
 
         card.translatesAutoresizingMaskIntoConstraints = false
+        card.contentView.backgroundColor = Theme.Background.deep.withAlphaComponent(0.72)
         titleLabel.textAlignment = .center
         scoreLabel.textAlignment = .center
         scoreLabel.textColor = Theme.Accent.gold

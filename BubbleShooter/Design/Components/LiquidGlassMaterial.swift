@@ -11,6 +11,8 @@ enum LiquidGlassMaterial {
     case card
     case panel
     case overlay
+    /// Compact navigation controls on busy wallpapers (e.g. Back).
+    case navigation
 
     func makeEffect() -> UIVisualEffect {
         if #available(iOS 26.0, *) {
@@ -39,6 +41,8 @@ enum LiquidGlassMaterial {
             UIColor.white.withAlphaComponent(0.05)
         case .overlay:
             Theme.Background.deep.withAlphaComponent(0.28)
+        case .navigation:
+            Theme.Background.deep.withAlphaComponent(0.52)
         }
     }
 
@@ -50,7 +54,7 @@ enum LiquidGlassMaterial {
         switch self {
         case .card, .panel:
             .systemChromeMaterialDark
-        case .overlay:
+        case .overlay, .navigation:
             .systemMaterialDark
         }
     }
@@ -66,6 +70,10 @@ enum LiquidGlassMaterial {
             return effect
         case .overlay:
             return UIGlassEffect(style: .regular)
+        case .navigation:
+            let effect = UIGlassEffect(style: .regular)
+            effect.tintColor = Theme.Background.deep.withAlphaComponent(0.35)
+            return effect
         }
     }
 }
