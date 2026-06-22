@@ -27,6 +27,14 @@ enum BubbleColor: Int, CaseIterable, Codable, Sendable {
         }
     }
 
+    /// Pop animation frames in `Assets.xcassets/Expression/`, when available.
+    var explosionFrameNames: [String]? {
+        switch self {
+        case .ruby: ["Ruby-explosion-1", "Ruby-explosion-2"]
+        default: nil
+        }
+    }
+
     var themeUIColor: UIColor {
         Theme.Bubble.uiColor(at: rawValue)
     }

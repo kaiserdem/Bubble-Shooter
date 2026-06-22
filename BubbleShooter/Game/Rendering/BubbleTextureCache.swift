@@ -25,5 +25,6 @@ enum BubbleTextureCache {
 
     static func preload() {
         BubbleColor.allCases.forEach { _ = texture(for: $0) }
+        BubbleExplosionTextureCache.preload()
     }
 }

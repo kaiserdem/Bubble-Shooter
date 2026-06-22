@@ -13,11 +13,13 @@ struct BubblePopSpec: Sendable {
 
 /// Available pop animation variants — switch `BubblePopEffectPlayer.style` to compare.
 enum BubblePopEffectStyle: String, CaseIterable, Sendable {
+    case spriteFrames
     case cosmicShatter
     case supernova
 
     var displayName: String {
         switch self {
+        case .spriteFrames: "Sprite Frames"
         case .cosmicShatter: "Cosmic Shatter"
         case .supernova: "Supernova"
         }
@@ -27,7 +29,7 @@ enum BubblePopEffectStyle: String, CaseIterable, Sendable {
 enum BubblePopEffectPlayer {
 
     /// Active pop animation. Change in sandbox or set before a match.
-    static var style: BubblePopEffectStyle = .supernova
+    static var style: BubblePopEffectStyle = .spriteFrames
 
     private static let cascadeStep: TimeInterval = 0.02
 
@@ -39,6 +41,13 @@ enum BubblePopEffectPlayer {
         guard !specs.isEmpty else { return }
 
         switch style {
+        case .spriteFrames:
+            SpriteBubblePopEffect.playGroup(
+                specs,
+                bubbleDiameter: bubbleDiameter,
+                in: parent
+            )
+
         case .cosmicShatter:
             let ordered = PopEffectCascade.ordered(specs)
             for (index, spec) in ordered.enumerated() {
