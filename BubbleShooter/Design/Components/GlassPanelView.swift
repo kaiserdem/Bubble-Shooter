@@ -8,104 +8,127 @@ import UIKit
 /// Frosted glass chrome — blurs content behind the panel (e.g. match wallpaper).
 final class GlassPanelView: UIView {
 
-    enum Style {
-        /// Playfield and HUD blocks — stronger frost.
-        case panel
-        /// Full-screen overlays — lighter veil so the wallpaper stays readable.
-        case veil
+  enum Style {
+    /// Playfield and HUD blocks.
+    case panel
+    /// Full-screen overlays — countdown / loading veil.
+    case veil
+  }
+
+  var style: Style = .panel {
+    didSet { applyStyle() }
+  }
+
+  var cornerRadius: CGFloat = Theme.Metrics.cornerRadiusMedium {
+    didSet { setNeedsLayout() }
+  }
+
+  var showsBorder: Bool = true {
+    didSet { borderLayer.isHidden = !showsBorder }
+  }
+
+  private let roundedContainer = UIView()
+  private let effectView = UIVisualEffectView()
+  private let tintOverlay = UIView()
+  private let borderLayer = CAShapeLayer()
+
+  override init(frame: CGRect) {
+    super.init(frame: frame)
+    configure()
+    applyStyle()
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    let radius = cornerRadius
+    roundedContainer.layer.cornerRadius = radius
+
+    if #available(iOS 26.0, *) {
+      effectView.cornerConfiguration = .uniformCorners(radius: .fixed(radius))
+    } else {
+      effectView.layer.cornerRadius = radius
     }
 
-    var style: Style = .panel {
-        didSet { applyStyle() }
+    if currentMaterial.usesLegacyTintOverlay {
+      tintOverlay.layer.cornerRadius = radius
     }
 
-    var cornerRadius: CGFloat = Theme.Metrics.cornerRadiusMedium {
-        didSet { setNeedsLayout() }
+    borderLayer.path = UIBezierPath(
+      roundedRect: roundedContainer.bounds.insetBy(
+        dx: Theme.Metrics.borderWidth / 2,
+        dy: Theme.Metrics.borderWidth / 2
+      ),
+      cornerRadius: radius
+    ).cgPath
+    borderLayer.frame = roundedContainer.bounds
+  }
+
+  private var currentMaterial: LiquidGlassMaterial {
+    switch style {
+    case .panel: .panel
+    case .veil: .overlay
+    }
+  }
+
+  private func configure() {
+    isOpaque = false
+    backgroundColor = .clear
+    clipsToBounds = false
+
+    roundedContainer.translatesAutoresizingMaskIntoConstraints = false
+    roundedContainer.clipsToBounds = true
+    roundedContainer.backgroundColor = .clear
+
+    effectView.translatesAutoresizingMaskIntoConstraints = false
+    effectView.clipsToBounds = true
+
+    tintOverlay.translatesAutoresizingMaskIntoConstraints = false
+    tintOverlay.isUserInteractionEnabled = false
+
+    addSubview(roundedContainer)
+    roundedContainer.addSubview(effectView)
+    roundedContainer.addSubview(tintOverlay)
+    roundedContainer.layer.addSublayer(borderLayer)
+
+    NSLayoutConstraint.activate([
+      roundedContainer.leadingAnchor.constraint(equalTo: leadingAnchor),
+      roundedContainer.trailingAnchor.constraint(equalTo: trailingAnchor),
+      roundedContainer.topAnchor.constraint(equalTo: topAnchor),
+      roundedContainer.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+      effectView.leadingAnchor.constraint(equalTo: roundedContainer.leadingAnchor),
+      effectView.trailingAnchor.constraint(equalTo: roundedContainer.trailingAnchor),
+      effectView.topAnchor.constraint(equalTo: roundedContainer.topAnchor),
+      effectView.bottomAnchor.constraint(equalTo: roundedContainer.bottomAnchor),
+
+      tintOverlay.leadingAnchor.constraint(equalTo: roundedContainer.leadingAnchor),
+      tintOverlay.trailingAnchor.constraint(equalTo: roundedContainer.trailingAnchor),
+      tintOverlay.topAnchor.constraint(equalTo: roundedContainer.topAnchor),
+      tintOverlay.bottomAnchor.constraint(equalTo: roundedContainer.bottomAnchor),
+    ])
+
+    borderLayer.fillColor = UIColor.clear.cgColor
+    borderLayer.strokeColor = Theme.Surface.border.cgColor
+    borderLayer.lineWidth = Theme.Metrics.borderWidth
+  }
+
+  private func applyStyle() {
+    let material = currentMaterial
+
+    if material.prefersDarkAppearance {
+      roundedContainer.overrideUserInterfaceStyle = .dark
     }
 
-    var showsBorder: Bool = true {
-        didSet { borderLayer.isHidden = !showsBorder }
-    }
+    effectView.effect = material.makeEffect()
+    effectView.alpha = material.legacyBlurAlpha
 
-    private let blurView: UIVisualEffectView = {
-        let effect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-        let view = UIVisualEffectView(effect: effect)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-
-    private let tintOverlay: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = Theme.Surface.fill
-        view.isUserInteractionEnabled = false
-        return view
-    }()
-
-    private let borderLayer = CAShapeLayer()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        configure()
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        let radius = cornerRadius
-        layer.cornerRadius = radius
-        blurView.layer.cornerRadius = radius
-        tintOverlay.layer.cornerRadius = radius
-
-        borderLayer.path = UIBezierPath(
-            roundedRect: bounds.insetBy(dx: Theme.Metrics.borderWidth / 2, dy: Theme.Metrics.borderWidth / 2),
-            cornerRadius: radius
-        ).cgPath
-        borderLayer.frame = bounds
-    }
-
-    private func configure() {
-        isOpaque = false
-        backgroundColor = .clear
-        clipsToBounds = true
-
-        addSubview(blurView)
-        addSubview(tintOverlay)
-
-        NSLayoutConstraint.activate([
-            blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            blurView.topAnchor.constraint(equalTo: topAnchor),
-            blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
-
-            tintOverlay.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tintOverlay.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tintOverlay.topAnchor.constraint(equalTo: topAnchor),
-            tintOverlay.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
-
-        borderLayer.fillColor = UIColor.clear.cgColor
-        borderLayer.strokeColor = Theme.Surface.border.cgColor
-        borderLayer.lineWidth = Theme.Metrics.borderWidth
-        layer.addSublayer(borderLayer)
-
-        applyStyle()
-    }
-
-    private func applyStyle() {
-        switch style {
-        case .panel:
-            blurView.effect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-            blurView.alpha = 1
-            tintOverlay.backgroundColor = Theme.Surface.fill
-        case .veil:
-            blurView.effect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-            blurView.alpha = 0.38
-            tintOverlay.backgroundColor = UIColor.white.withAlphaComponent(0.06)
-        }
-    }
+    let usesTint = material.usesLegacyTintOverlay
+    tintOverlay.isHidden = !usesTint
+    tintOverlay.backgroundColor = material.legacyTintColor
+  }
 }

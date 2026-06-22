@@ -106,6 +106,7 @@ class LobbyScreenView: UIView {
         scrollView.showsVerticalScrollIndicator = true
         scrollView.delaysContentTouches = false
         scrollView.alwaysBounceVertical = true
+        scrollView.backgroundColor = .clear
 
         scrollStack.axis = .vertical
         scrollStack.spacing = Theme.Metrics.spacingMedium
