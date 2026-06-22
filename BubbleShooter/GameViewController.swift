@@ -11,8 +11,8 @@ final class GameViewController: UIViewController {
     // MARK: - Configuration
 
     private enum Config {
-        static let skillzGameID = "YOUR_SKILLZ_GAME_ID"
-        static let skillzEnvironment: AppSkillzEnvironment = .sandbox
+        static let skillzGameID = SkillzConfiguration.gameID
+        static let skillzEnvironment = SkillzConfiguration.environment
     }
 
     // MARK: - State
@@ -23,6 +23,8 @@ final class GameViewController: UIViewController {
     private var matchLayoutView: MatchLayoutView?
     private var matchIntroOverlay: MatchIntroOverlayView?
     private var matchResultsView: MatchResultsView?
+    private var activeMatchContext: SkillzMatchContext?
+    private var pendingMatchResults: MatchResultsState?
 
     // MARK: - Lifecycle
 
@@ -32,6 +34,12 @@ final class GameViewController: UIViewController {
         configureSkillz()
         BackgroundMusicPlayer.shared.playIfEnabled()
         showMainMenuIfNeeded()
+    }
+
+    deinit {
+        #if USE_SKILLZ_SDK
+        SkillzAppCoordinator.shared.detach(self)
+        #endif
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -68,11 +76,7 @@ private extension GameViewController {
 
     func configureSkillz() {
         #if USE_SKILLZ_SDK
-        SkillzSDKBridge.initialize(
-            gameID: Config.skillzGameID,
-            environment: Config.skillzEnvironment,
-            delegate: self
-        )
+        SkillzAppCoordinator.shared.attach(self)
         #else
         skillzService.initialize(
             gameID: Config.skillzGameID,
@@ -131,6 +135,7 @@ private extension GameViewController {
         let scene = GameScene(size: sceneSize)
         scene.scaleMode = .resizeFill
         scene.configure(with: matchContext)
+        activeMatchContext = matchContext
 
         gameScene = scene
         scene.hudDelegate = self
@@ -138,8 +143,16 @@ private extension GameViewController {
         scene.previewMatchHUD()
 
         results.onContinue = { [weak self] in
-            self?.matchResultsView?.dismiss { [weak self] in
+            guard let self, let results = self.pendingMatchResults else { return }
+            self.matchResultsView?.dismiss { [weak self] in
+                guard let self else { return }
+                #if USE_SKILLZ_SDK
+                SkillzSDKBridge.displayTournamentResults(score: results.finalScore) { [weak self] in
+                    self?.teardownMatchUI()
+                }
+                #else
                 MockSkillzService.shared.simulateSkillzExit()
+                #endif
             }
         }
 
@@ -165,6 +178,8 @@ private extension GameViewController {
         matchIntroOverlay = nil
         matchResultsView = nil
         gameScene = nil
+        activeMatchContext = nil
+        pendingMatchResults = nil
     }
 
     #if DEBUG
@@ -205,9 +220,16 @@ extension GameViewController: GameSceneHUDDelegate {
 
     func gameScene(_ scene: GameScene, didUpdateHUD state: MatchHUDState) {
         matchLayoutView?.update(with: state)
+        #if USE_SKILLZ_SDK
+        SkillzSDKBridge.updateCurrentScore(state.score)
+        #endif
     }
 
     func gameSceneDidRequestMatchEnd(_ scene: GameScene, results: MatchResultsState) {
+        pendingMatchResults = results
+        #if USE_SKILLZ_SDK
+        SkillzSDKBridge.updateCurrentScore(results.finalScore)
+        #endif
         matchResultsView?.present(with: results)
     }
 }

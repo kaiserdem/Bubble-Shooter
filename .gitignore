@@ -43,6 +43,7 @@ fastlane/screenshots/**/*.png
 fastlane/test_output
 
 # Skillz SDK (додайте framework локально, не комітьте бінарники)
+Vendor/Skillz/
 Skillz.framework/
 Skillz.xcframework/
 *.framework/

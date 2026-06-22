@@ -2,29 +2,36 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Bluetooth access ensures that cheaters cannot use external devices to defraud you and other users.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Bluetooth access ensures that cheaters cannot use external devices to defraud you and other users.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Skillz requires access to the calendar to store events invite.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Skillz can access your camera to customize your profile picture.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Your contacts will be uploaded to the Skillz servers so you can easily find friends to chat and play.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>To keep our community safe, your location is required in order to play for real-world prizes.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Due to legal requirements we require your location in games that can be played for cash.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Skillz uses your location to verify eligibility for cash tournaments.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Motion-data helps detect suspicious behavior associated with cheating.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This allows you to save photos to your camera roll.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Skillz uses access to your photo album to customize your profile picture.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Your data allows for the optimization of the in-app ad experience for you.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>boinklet.ttf</string>
 	</array>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-		<key>UIApplicationSupportsMultipleScenes</key>
-		<false/>
-		<key>UISceneConfigurations</key>
-		<dict>
-			<key>UIWindowSceneSessionRoleApplication</key>
-			<array>
-				<dict>
-					<key>UISceneConfigurationName</key>
-					<string>Default Configuration</string>
-					<key>UISceneDelegateClassName</key>
-					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
-					<key>UISceneStoryboardFile</key>
-					<string>Main</string>
-				</dict>
-			</array>
-		</dict>
-	</dict>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

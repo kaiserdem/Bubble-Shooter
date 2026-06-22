@@ -19,7 +19,7 @@ final class MatchResultsView: UIView {
     private let popRow = BreakdownRow(title: "Pop")
     private let dropRow = BreakdownRow(title: "Drop")
     private let timeBonusRow = BreakdownRow(title: "Time bonus")
-    private let continueButton = ArcadeButton(title: "Continue", style: .primary)
+    private let continueButton = ArcadeButton(title: "Submit Score", style: .primary)
 
     private let scoreFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
