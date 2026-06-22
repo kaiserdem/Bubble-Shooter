@@ -170,6 +170,7 @@ private extension GameScene {
               let layout = hexLayout,
               let grid,
               let gameplayParameters,
+              let shotQueue,
               let ray = shotRay(toward: scenePoint) else { return }
 
         let configuration = gameplayParameters.gridConfiguration
@@ -181,6 +182,7 @@ private extension GameScene {
         )
         let previewPath = animationPath(
             for: path,
+            shotBubble: shotQueue.current,
             grid: grid,
             layout: layout,
             configuration: configuration
@@ -203,8 +205,10 @@ private extension GameScene {
             grid: grid,
             configuration: configuration
         )
+        let shotBubble = shotQueue.current
         let animationPath = animationPath(
             for: path,
+            shotBubble: shotBubble,
             grid: grid,
             layout: layout,
             configuration: configuration
@@ -214,7 +218,6 @@ private extension GameScene {
         cannonPivot?.hideAimGuide()
         pendingShotPath = path
 
-        let shotBubble = shotQueue.current
         cannonPivot?.cannon.beginShot()
 
         flyingBubble = FlyingBubbleNode.animate(
@@ -233,12 +236,14 @@ private extension GameScene {
 
     func animationPath(
         for path: ShotPath,
+        shotBubble: Bubble,
         grid: BubbleGrid,
         layout: HexLayout,
         configuration: GridConfiguration
     ) -> ShotPath {
         guard let snapPosition = SnapResolver.resolve(
             hit: path.hit,
+            shotBubble: shotBubble,
             grid: grid,
             layout: layout,
             configuration: configuration
@@ -276,6 +281,7 @@ private extension GameScene {
 
         if let snapPosition = SnapResolver.resolve(
             hit: path.hit,
+            shotBubble: shotBubble,
             grid: grid,
             layout: layout,
             configuration: configuration

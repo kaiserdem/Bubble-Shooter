@@ -10,14 +10,12 @@ enum MatchFinder {
 
     static let minimumMatchSize = 3
 
-    /// Connected component of the same color that includes `position`.
-    /// Returns sorted positions when size is at least `minimumMatchSize`.
-    static func matchingGroup(
+    /// Connected same-color component that includes `position` (any size).
+    static func connectedGroup(
         including position: GridPosition,
-        in grid: BubbleGrid,
-        minimumSize: Int = minimumMatchSize
-    ) -> [GridPosition]? {
-        guard let originColor = grid.bubble(at: position)?.color else { return nil }
+        in grid: BubbleGrid
+    ) -> [GridPosition] {
+        guard let originColor = grid.bubble(at: position)?.color else { return [] }
 
         var group: [GridPosition] = []
         var visited: Set<GridPosition> = []
@@ -36,7 +34,17 @@ enum MatchFinder {
             }
         }
 
-        group.sort()
+        return group.sorted()
+    }
+
+    /// Connected component of the same color that includes `position`.
+    /// Returns sorted positions when size is at least `minimumMatchSize`.
+    static func matchingGroup(
+        including position: GridPosition,
+        in grid: BubbleGrid,
+        minimumSize: Int = minimumMatchSize
+    ) -> [GridPosition]? {
+        let group = connectedGroup(including: position, in: grid)
         guard group.count >= minimumSize else { return nil }
         return group
     }

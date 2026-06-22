@@ -10,6 +10,7 @@ enum SnapResolver {
 
     static func resolve(
         hit: ShotHit,
+        shotBubble: Bubble,
         grid: BubbleGrid,
         layout: HexLayout,
         configuration: GridConfiguration
@@ -19,6 +20,7 @@ enum SnapResolver {
             return snapNearBubble(
                 hitPosition: hitPosition,
                 impactPoint: hit.point,
+                shotBubble: shotBubble,
                 grid: grid,
                 layout: layout,
                 configuration: configuration
@@ -27,6 +29,7 @@ enum SnapResolver {
         case .ceiling:
             return snapToCeiling(
                 impactPoint: hit.point,
+                shotBubble: shotBubble,
                 grid: grid,
                 layout: layout,
                 configuration: configuration
@@ -42,6 +45,7 @@ enum SnapResolver {
     private static func snapNearBubble(
         hitPosition: GridPosition,
         impactPoint: CGPoint,
+        shotBubble: Bubble,
         grid: BubbleGrid,
         layout: HexLayout,
         configuration: GridConfiguration
@@ -56,11 +60,19 @@ enum SnapResolver {
             candidates = Array(Set(candidates))
         }
 
-        return closestPosition(to: impactPoint, among: candidates, layout: layout, configuration: configuration)
+        return bestSnapPosition(
+            among: candidates,
+            impactPoint: impactPoint,
+            shotBubble: shotBubble,
+            grid: grid,
+            layout: layout,
+            configuration: configuration
+        )
     }
 
     private static func snapToCeiling(
         impactPoint: CGPoint,
+        shotBubble: Bubble,
         grid: BubbleGrid,
         layout: HexLayout,
         configuration: GridConfiguration
@@ -77,23 +89,62 @@ enum SnapResolver {
             candidates = (0..<columnCount).map { GridPosition(row: row, col: $0) }
         }
 
-        return closestPosition(to: impactPoint, among: candidates, layout: layout, configuration: configuration)
+        return bestSnapPosition(
+            among: candidates,
+            impactPoint: impactPoint,
+            shotBubble: shotBubble,
+            grid: grid,
+            layout: layout,
+            configuration: configuration
+        )
+    }
+
+    private static func bestSnapPosition(
+        among candidates: [GridPosition],
+        impactPoint: CGPoint,
+        shotBubble: Bubble,
+        grid: BubbleGrid,
+        layout: HexLayout,
+        configuration: GridConfiguration
+    ) -> GridPosition? {
+        guard !candidates.isEmpty else { return nil }
+
+        return candidates.max { lhs, rhs in
+            let leftScore = connectionScore(
+                at: lhs,
+                shotBubble: shotBubble,
+                grid: grid
+            )
+            let rightScore = connectionScore(
+                at: rhs,
+                shotBubble: shotBubble,
+                grid: grid
+            )
+            if leftScore != rightScore { return leftScore < rightScore }
+
+            let leftCenter = layout.center(for: lhs, configuration: configuration)
+            let rightCenter = layout.center(for: rhs, configuration: configuration)
+            let leftDistance = hypot(leftCenter.x - impactPoint.x, leftCenter.y - impactPoint.y)
+            let rightDistance = hypot(rightCenter.x - impactPoint.x, rightCenter.y - impactPoint.y)
+            return leftDistance > rightDistance
+        }
+    }
+
+    private static func connectionScore(
+        at position: GridPosition,
+        shotBubble: Bubble,
+        grid: BubbleGrid
+    ) -> Int {
+        var simulated = grid
+        do {
+            try simulated.place(shotBubble, at: position)
+        } catch {
+            return 0
+        }
+        return MatchFinder.connectedGroup(including: position, in: simulated).count
     }
 
     private static func emptyNeighbors(around position: GridPosition, grid: BubbleGrid) -> [GridPosition] {
         grid.neighbors(of: position).filter { !grid.isOccupied($0) }
-    }
-
-    private static func closestPosition(
-        to point: CGPoint,
-        among candidates: [GridPosition],
-        layout: HexLayout,
-        configuration: GridConfiguration
-    ) -> GridPosition? {
-        candidates.min { lhs, rhs in
-            let left = layout.center(for: lhs, configuration: configuration)
-            let right = layout.center(for: rhs, configuration: configuration)
-            return hypot(left.x - point.x, left.y - point.y) < hypot(right.x - point.x, right.y - point.y)
-        }
     }
 }
