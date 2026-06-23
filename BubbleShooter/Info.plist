@@ -32,12 +32,5 @@
 	</array>
 	<key>UIRequiresFullScreen</key>
 	<true/>
-	<key>UILaunchScreen</key>
-	<dict>
-		<key>UIImageName</key>
-		<string>launch background</string>
-		<key>UIImageRespectsSafeAreaInsets</key>
-		<false/>
-	</dict>
 </dict>
 </plist>

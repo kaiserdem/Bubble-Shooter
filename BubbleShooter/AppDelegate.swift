@@ -18,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             delegate: SkillzAppCoordinator.shared
         )
         #endif
+        window?.backgroundColor = Theme.Background.deep
         return true
     }
 }

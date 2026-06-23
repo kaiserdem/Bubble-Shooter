@@ -26,14 +26,20 @@ final class GameViewController: UIViewController {
     private var activeMatchContext: SkillzMatchContext?
     private var pendingMatchResults: MatchResultsState?
     private var progressionShopFlow: ShopFlowView?
-    private var launchSplashView: ImageBackgroundView?
+    @IBOutlet private weak var launchSplashImageView: UIImageView!
+    private var launchSplashView: UIView?
 
     // MARK: - Lifecycle
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        launchSplashImageView?.image = UIImage(named: Theme.Asset.Background.launch)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = Theme.Background.deep
-        installLaunchSplash()
+        wireLaunchSplashFromStoryboard()
         configureSkillz()
         BackgroundMusicPlayer.shared.playIfEnabled()
         showMainMenuIfNeeded()
@@ -238,7 +244,19 @@ private extension GameViewController {
         dismissLaunchSplash()
     }
 
-    private func installLaunchSplash() {
+    private func wireLaunchSplashFromStoryboard() {
+        guard let launchSplashImageView else {
+            installLaunchSplashFallback()
+            return
+        }
+        launchSplashImageView.image = UIImage(named: Theme.Asset.Background.launch)
+        launchSplashImageView.contentMode = .scaleAspectFill
+        launchSplashImageView.clipsToBounds = true
+        launchSplashImageView.isUserInteractionEnabled = false
+        launchSplashView = launchSplashImageView
+    }
+
+    private func installLaunchSplashFallback() {
         let splash = ImageBackgroundView(named: Theme.Asset.Background.launch)
         splash.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(splash)
