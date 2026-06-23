@@ -44,7 +44,7 @@ struct AchievementDefinition: Sendable {
             title: "Board Master",
             detail: "Clear the entire board once.",
             tier: .silver,
-            reward: .coins(100),
+            reward: .cosmetic(.bubbleShimmer),
             targetValue: 1
         ),
         AchievementDefinition(
@@ -52,7 +52,7 @@ struct AchievementDefinition: Sendable {
             title: "High Scorer",
             detail: "Score 8,000 points in a single match.",
             tier: .silver,
-            reward: .coins(100),
+            reward: .cosmetic(.cannonNebula),
             targetValue: 8_000
         ),
         AchievementDefinition(

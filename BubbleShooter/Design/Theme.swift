@@ -21,6 +21,7 @@ enum Theme {
 
     enum Asset {
         enum Background {
+            static let launch = "launch background"
             static let lobby = "lobby background"
             static let game = "game background"
         }

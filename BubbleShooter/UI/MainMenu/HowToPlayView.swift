@@ -184,7 +184,7 @@ final class HowToPlayView: LobbyScreenView {
                 ),
                 GuideItem(
                     title: "Rewards",
-                    detail: "Bronze, silver, and gold tiers pay coins. Gold achievements can also unlock exclusive shop cosmetics for free.",
+                    detail: "Bronze and silver tiers pay coins or unlock shop cosmetics. Gold achievements award exclusive bubble packs and cannons.",
                     previewImageNames: nil
                 ),
             ]

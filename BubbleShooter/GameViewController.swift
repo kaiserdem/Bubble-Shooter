@@ -26,12 +26,14 @@ final class GameViewController: UIViewController {
     private var activeMatchContext: SkillzMatchContext?
     private var pendingMatchResults: MatchResultsState?
     private var progressionShopFlow: ShopFlowView?
+    private var launchSplashView: ImageBackgroundView?
 
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = Theme.Background.gradientBottom
+        view.backgroundColor = Theme.Background.deep
+        installLaunchSplash()
         configureSkillz()
         BackgroundMusicPlayer.shared.playIfEnabled()
         showMainMenuIfNeeded()
@@ -195,9 +197,23 @@ private extension GameViewController {
     #endif
 
     func showMainMenuIfNeeded() {
-        guard mainMenuView == nil else { return }
+        guard mainMenuView == nil else {
+            dismissLaunchSplash()
+            return
+        }
 
-        SkillzProgressionService.shared.refresh { _ in }
+        SkillzProgressionService.shared.refresh { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.attachMainMenu()
+            }
+        }
+    }
+
+    private func attachMainMenu() {
+        guard mainMenuView == nil else {
+            dismissLaunchSplash()
+            return
+        }
 
         let menu = MainMenuContainerView()
         menu.onPlay = {
@@ -216,6 +232,33 @@ private extension GameViewController {
             menu.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         mainMenuView = menu
+        if let splash = launchSplashView {
+            view.bringSubviewToFront(splash)
+        }
+        dismissLaunchSplash()
+    }
+
+    private func installLaunchSplash() {
+        let splash = ImageBackgroundView(named: Theme.Asset.Background.launch)
+        splash.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(splash)
+        NSLayoutConstraint.activate([
+            splash.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            splash.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            splash.topAnchor.constraint(equalTo: view.topAnchor),
+            splash.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+        launchSplashView = splash
+    }
+
+    private func dismissLaunchSplash() {
+        guard let splash = launchSplashView else { return }
+        launchSplashView = nil
+        UIView.animate(withDuration: 0.35, delay: 0, options: .curveEaseOut) {
+            splash.alpha = 0
+        } completion: { _ in
+            splash.removeFromSuperview()
+        }
     }
 
     func hideMainMenu() {

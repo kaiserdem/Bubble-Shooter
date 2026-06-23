@@ -24,14 +24,12 @@ enum AchievementRewardArt {
 
     static func giftIconName(for id: AchievementID) -> String {
         switch id {
-        case .veteran:
-            Theme.Asset.Shop.gift1
-        case .perfectionist:
+        case .boardMaster, .perfectionist, .collector:
             Theme.Asset.Shop.gift2
+        case .highScorer, .veteran:
+            Theme.Asset.Shop.gift1
         case .legend:
             Theme.Asset.Shop.gift3
-        case .collector:
-            Theme.Asset.Shop.gift2
         default:
             Theme.Asset.Shop.gift1
         }
