@@ -185,7 +185,7 @@ final class ArcadeButton: UIControl {
             gradientLayer.startPoint = CGPoint(x: 0, y: 0.35)
             gradientLayer.endPoint = CGPoint(x: 1, y: 0.65)
             borderLayer.strokeColor = UIColor(hex: 0xFFD84D).cgColor
-            titleLabel.textColor = Theme.Text.onDark
+            Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.onDark)
 
         case .secondary:
             gradientLayer.isHidden = false
@@ -197,7 +197,7 @@ final class ArcadeButton: UIControl {
             gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
             gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
             borderLayer.strokeColor = Theme.Accent.secondary.cgColor
-            titleLabel.textColor = Theme.Text.onDark
+            Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.onDark)
 
         case .gold:
             gradientLayer.isHidden = false
@@ -209,7 +209,7 @@ final class ArcadeButton: UIControl {
             gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
             gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
             borderLayer.strokeColor = Theme.Accent.gold.cgColor
-            titleLabel.textColor = Theme.Text.onDark
+            Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.onDark)
 
         case .violet:
             gradientLayer.isHidden = false
@@ -221,7 +221,7 @@ final class ArcadeButton: UIControl {
             gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
             gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
             borderLayer.strokeColor = UIColor(hex: 0xD4B0FF).cgColor
-            titleLabel.textColor = Theme.Text.onDark
+            Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.onDark)
 
         case .ghost:
             if usesGlassBackground {
@@ -235,7 +235,7 @@ final class ArcadeButton: UIControl {
                     Theme.Surface.fillStrong.cgColor,
                 ]
                 borderLayer.strokeColor = Theme.Surface.border.cgColor
-                titleLabel.textColor = Theme.Text.primary
+                Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.primary)
             }
 
         case .danger:
@@ -246,7 +246,7 @@ final class ArcadeButton: UIControl {
                 UIColor(hex: 0xFF3D5A).cgColor,
             ]
             borderLayer.strokeColor = Theme.Accent.danger.cgColor
-            titleLabel.textColor = Theme.Text.onDark
+            Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.onDark)
         }
     }
 

@@ -167,7 +167,14 @@ final class SkillzProgressionService {
             ownedBubbleShimmer: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedBubbleShimmer),
             ownedBubblePlanet: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedBubblePlanet),
             ownedBubbleGlossy: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedBubbleGlossy),
-            ownedCannonGold: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonGold)
+            ownedCannonGold: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonGold),
+            ownedCannonNebula: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonNebula),
+            ownedCannonSolar: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonSolar),
+            ownedCannonEmerald: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonEmerald),
+            ownedCannonRuby: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonRuby),
+            ownedCannonAurora: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonAurora),
+            ownedCannonCrystal: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonCrystal),
+            ownedCannonCopper: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonCopper)
         )
     }
 
@@ -178,5 +185,12 @@ final class SkillzProgressionService {
         defaults.set(state.ownedBubblePlanet, forKey: defaultsPrefix + ProgressionKeys.ownedBubblePlanet)
         defaults.set(state.ownedBubbleGlossy, forKey: defaultsPrefix + ProgressionKeys.ownedBubbleGlossy)
         defaults.set(state.ownedCannonGold, forKey: defaultsPrefix + ProgressionKeys.ownedCannonGold)
+        defaults.set(state.ownedCannonNebula, forKey: defaultsPrefix + ProgressionKeys.ownedCannonNebula)
+        defaults.set(state.ownedCannonSolar, forKey: defaultsPrefix + ProgressionKeys.ownedCannonSolar)
+        defaults.set(state.ownedCannonEmerald, forKey: defaultsPrefix + ProgressionKeys.ownedCannonEmerald)
+        defaults.set(state.ownedCannonRuby, forKey: defaultsPrefix + ProgressionKeys.ownedCannonRuby)
+        defaults.set(state.ownedCannonAurora, forKey: defaultsPrefix + ProgressionKeys.ownedCannonAurora)
+        defaults.set(state.ownedCannonCrystal, forKey: defaultsPrefix + ProgressionKeys.ownedCannonCrystal)
+        defaults.set(state.ownedCannonCopper, forKey: defaultsPrefix + ProgressionKeys.ownedCannonCopper)
     }
 }

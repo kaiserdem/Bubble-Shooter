@@ -13,7 +13,7 @@ enum CosmeticUnlockPolicy {
     }
 
     static func isFree(_ skin: CannonSkin) -> Bool {
-        skin != .gold
+        skin == .standard
     }
 
     static func isOwned(_ pack: BubbleSkinPack, progression: PlayerProgressionState) -> Bool {
@@ -29,7 +29,7 @@ enum CosmeticUnlockPolicy {
 
     static func isOwned(_ skin: CannonSkin, progression: PlayerProgressionState) -> Bool {
         if isFree(skin) { return true }
-        return progression.ownedCannonGold
+        return progression.isOwned(skin)
     }
 
     static func canEquip(_ pack: BubbleSkinPack) -> Bool {
@@ -52,8 +52,15 @@ enum CosmeticUnlockPolicy {
 
     static func shopItem(for skin: CannonSkin) -> CosmeticShopItem? {
         switch skin {
+        case .standard: nil
         case .gold: .cannonGold
-        default: nil
+        case .nebula: .cannonNebula
+        case .solar: .cannonSolar
+        case .emerald: .cannonEmerald
+        case .ruby: .cannonRuby
+        case .aurora: .cannonAurora
+        case .crystal: .cannonCrystal
+        case .copper: .cannonCopper
         }
     }
 }

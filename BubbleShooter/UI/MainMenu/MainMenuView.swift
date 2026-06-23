@@ -39,8 +39,8 @@ final class MainMenuView: UIView {
         card.translatesAutoresizingMaskIntoConstraints = false
 
         titleLabel.textAlignment = .center
-        subtitleLabel.textAlignment = .center
-        subtitleLabel.textColor = Theme.Text.secondary
+        Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.primary)
+        Theme.Text.applyHUDLegibility(to: subtitleLabel, color: Theme.Text.secondary)
 
         playButton.addAction(UIAction { [weak self] _ in
             self?.onPlay?()
