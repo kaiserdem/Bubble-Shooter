@@ -22,11 +22,15 @@ final class CosmeticStyleRow: UIView {
     private let statusLabel = ArcadeLabel("", style: .body)
     private let previewContainer = UIView()
     private let previewStack = UIStackView()
+    private let bubblePopOverlay = BubblePopPreviewOverlay()
+    private let actionsRow = UIStackView()
     private let actionContainer = UIView()
     private let equipButton = ArcadeButton(title: "Equip", style: .secondary, size: .compact)
     private let buyButton = ArcadeButton(title: "Buy", style: .gold, size: .compact)
+    private let tryButton = ArcadeButton(title: "Try", style: .violet, size: .compact)
     private let equippedBadge = BadgeView(text: "EQUIPPED", tint: Theme.Accent.primary)
     private var shopItem: CosmeticShopItem?
+    private var previewBubbleViews: [UIImageView] = []
     private let previewLayout: PreviewLayout
     private let previewIconSize: CGFloat
 
@@ -45,7 +49,7 @@ final class CosmeticStyleRow: UIView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard !isHidden, alpha > 0.01, isUserInteractionEnabled else { return nil }
         guard bounds.contains(point) else { return nil }
-        return actionContainer.hitTest(convert(point, to: actionContainer), with: event)
+        return actionsRow.hitTest(convert(point, to: actionsRow), with: event)
     }
 
     func configure(
@@ -127,11 +131,19 @@ final class CosmeticStyleRow: UIView {
             self.onBuyTapped?(shopItem)
         }, for: .touchUpInside)
 
+        tryButton.addAction(UIAction { [weak self] _ in
+            self?.playBubblePopPreview()
+        }, for: .touchUpInside)
+
         actionContainer.translatesAutoresizingMaskIntoConstraints = false
         configureActions()
 
         switch previewLayout {
         case .bubbleStrip:
+            previewContainer.clipsToBounds = true
+            bubblePopOverlay.translatesAutoresizingMaskIntoConstraints = false
+            previewContainer.addSubview(bubblePopOverlay)
+
             let padding = Theme.Metrics.spacingMedium
             let previewHeight = previewIconSize + Theme.Metrics.spacingMedium
             configureBubbleLayout(padding: padding, previewHeight: previewHeight)
@@ -165,8 +177,10 @@ final class CosmeticStyleRow: UIView {
         equippedBadge.translatesAutoresizingMaskIntoConstraints = false
         equipButton.translatesAutoresizingMaskIntoConstraints = false
         buyButton.translatesAutoresizingMaskIntoConstraints = false
+        equippedBadge.setContentHuggingPriority(.defaultLow, for: .horizontal)
         equipButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
         buyButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        equippedBadge.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         equipButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         buyButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
@@ -187,14 +201,11 @@ final class CosmeticStyleRow: UIView {
         var constraints =
             pinToSlot(equipButton)
             + pinToSlot(buyButton)
+            + pinToSlot(equippedBadge)
             + [
                 slot.topAnchor.constraint(equalTo: actionContainer.topAnchor),
                 slot.bottomAnchor.constraint(equalTo: actionContainer.bottomAnchor),
                 slot.heightAnchor.constraint(equalToConstant: ActionSlotMetrics.height),
-
-                equippedBadge.centerXAnchor.constraint(equalTo: slot.centerXAnchor),
-                equippedBadge.centerYAnchor.constraint(equalTo: slot.centerYAnchor),
-                equippedBadge.heightAnchor.constraint(equalToConstant: ActionSlotMetrics.height),
             ]
 
         if let fixedWidth {
@@ -222,9 +233,22 @@ final class CosmeticStyleRow: UIView {
         textStack.isUserInteractionEnabled = false
         textStack.translatesAutoresizingMaskIntoConstraints = false
 
+        actionsRow.axis = .horizontal
+        actionsRow.spacing = Theme.Metrics.spacingSmall
+        actionsRow.alignment = .fill
+        actionsRow.distribution = .fill
+        actionsRow.translatesAutoresizingMaskIntoConstraints = false
+        actionsRow.isUserInteractionEnabled = true
+        actionsRow.addArrangedSubview(tryButton)
+        actionsRow.addArrangedSubview(actionContainer)
+
+        tryButton.setContentHuggingPriority(.required, for: .horizontal)
+        tryButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        tryButton.widthAnchor.constraint(equalToConstant: ActionSlotMetrics.cannonWidth).isActive = true
+
         addSubview(textStack)
         addSubview(previewContainer)
-        addSubview(actionContainer)
+        addSubview(actionsRow)
 
         NSLayoutConstraint.activate([
             textStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
@@ -236,15 +260,20 @@ final class CosmeticStyleRow: UIView {
             previewContainer.topAnchor.constraint(equalTo: textStack.bottomAnchor, constant: Theme.Metrics.spacingSmall),
             previewContainer.heightAnchor.constraint(equalToConstant: previewHeight),
 
-            actionContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
-            actionContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
-            actionContainer.topAnchor.constraint(equalTo: previewContainer.bottomAnchor, constant: Theme.Metrics.spacingMedium),
-            actionContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -padding),
+            actionsRow.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
+            actionsRow.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
+            actionsRow.topAnchor.constraint(equalTo: previewContainer.bottomAnchor, constant: Theme.Metrics.spacingMedium),
+            actionsRow.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -padding),
 
             previewStack.leadingAnchor.constraint(equalTo: previewContainer.leadingAnchor),
             previewStack.trailingAnchor.constraint(equalTo: previewContainer.trailingAnchor),
             previewStack.topAnchor.constraint(equalTo: previewContainer.topAnchor),
             previewStack.bottomAnchor.constraint(equalTo: previewContainer.bottomAnchor),
+
+            bubblePopOverlay.leadingAnchor.constraint(equalTo: previewContainer.leadingAnchor),
+            bubblePopOverlay.trailingAnchor.constraint(equalTo: previewContainer.trailingAnchor),
+            bubblePopOverlay.topAnchor.constraint(equalTo: previewContainer.topAnchor),
+            bubblePopOverlay.bottomAnchor.constraint(equalTo: previewContainer.bottomAnchor),
         ])
     }
 
@@ -258,7 +287,14 @@ final class CosmeticStyleRow: UIView {
         textStack.alignment = .leading
         textStack.isUserInteractionEnabled = false
 
-        let header = UIStackView(arrangedSubviews: [textStack, actionContainer])
+        actionsRow.axis = .horizontal
+        actionsRow.spacing = Theme.Metrics.spacingSmall
+        actionsRow.alignment = .center
+        actionsRow.distribution = .fill
+        actionsRow.isUserInteractionEnabled = true
+        actionsRow.addArrangedSubview(actionContainer)
+
+        let header = UIStackView(arrangedSubviews: [textStack, actionsRow])
         header.axis = .horizontal
         header.alignment = .center
         header.distribution = .equalSpacing
@@ -286,13 +322,26 @@ final class CosmeticStyleRow: UIView {
         ])
     }
 
+    private func playBubblePopPreview() {
+        guard previewLayout == .bubbleStrip, !previewBubbleViews.isEmpty else { return }
+        tryButton.isEnabled = false
+        bubblePopOverlay.play(
+            anchorViews: previewBubbleViews,
+            colors: BubbleColor.allCases,
+            bubbleDiameter: previewIconSize
+        ) { [weak self] in
+            self?.tryButton.isEnabled = true
+        }
+    }
+
     private func rebuildPreview(names: [String]) {
+        previewBubbleViews = []
         previewStack.arrangedSubviews.forEach {
             previewStack.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
         previewContainer.subviews
-            .filter { $0 !== previewStack }
+            .filter { $0 !== previewStack && $0 !== bubblePopOverlay }
             .forEach { $0.removeFromSuperview() }
 
         switch previewLayout {
@@ -306,6 +355,7 @@ final class CosmeticStyleRow: UIView {
                     imageView.heightAnchor.constraint(equalToConstant: previewIconSize),
                 ])
                 previewStack.addArrangedSubview(imageView)
+                previewBubbleViews.append(imageView)
             }
 
         case .singleCentered:

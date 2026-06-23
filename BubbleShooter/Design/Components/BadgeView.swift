@@ -29,10 +29,11 @@ final class BadgeView: UIView {
 
     private func configure(tint: UIColor) {
         backgroundColor = tint.withAlphaComponent(0.22)
-        layer.cornerRadius = 10
+        layer.cornerRadius = Theme.Metrics.cornerRadiusSmall
         layer.borderWidth = Theme.Metrics.borderWidth
         layer.borderColor = tint.withAlphaComponent(0.55).cgColor
 
+        label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
         NSLayoutConstraint.activate([

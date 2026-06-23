@@ -8,17 +8,19 @@ import SpriteKit
 /// Pop animation from PNG frame sequences (`Expression/*-explosion-*`).
 enum SpriteBubblePopEffect {
 
-    private static let frameDuration: TimeInterval = 0.09
-    private static let cascadeStep: TimeInterval = 0.02
+    private static let defaultFrameDuration: TimeInterval = 0.09
+    private static let defaultCascadeStep: TimeInterval = 0.02
     /// Explosion art includes outward splashes beyond the bubble circle.
     private static let visualScale: CGFloat = 1.28
     /// Grows to 1.5× base size while frames 1–2 play.
-    private static let peakScaleFactor: CGFloat = 1.5
+    private static let defaultPeakScaleFactor: CGFloat = 1.5
 
     static func playGroup(
         _ specs: [BubblePopSpec],
         bubbleDiameter: CGFloat,
-        in parent: SKNode
+        in parent: SKNode,
+        cascadeStep: TimeInterval = defaultCascadeStep,
+        frameDuration: TimeInterval = defaultFrameDuration
     ) {
         guard !specs.isEmpty else { return }
 
@@ -30,7 +32,8 @@ enum SpriteBubblePopEffect {
                 color: spec.color,
                 diameter: bubbleDiameter,
                 delay: delay,
-                in: parent
+                in: parent,
+                frameDuration: frameDuration
             )
         }
     }
@@ -40,7 +43,9 @@ enum SpriteBubblePopEffect {
         color: BubbleColor,
         diameter: CGFloat,
         delay: TimeInterval,
-        in parent: SKNode
+        in parent: SKNode,
+        frameDuration: TimeInterval = defaultFrameDuration,
+        peakScaleFactor: CGFloat = defaultPeakScaleFactor
     ) {
         guard let textures = BubbleExplosionTextureCache.frames(for: color), !textures.isEmpty else {
             CosmicShatterPopEffect.play(

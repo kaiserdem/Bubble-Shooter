@@ -46,6 +46,7 @@ final class BubbleStyleListView: LobbyScreenView {
     }
 
     override func present(animated: Bool = true) {
+        BubbleExplosionTextureCache.preload()
         SkillzProgressionService.shared.refresh { [weak self] _ in
             DispatchQueue.main.async {
                 self?.reloadFromStorage()

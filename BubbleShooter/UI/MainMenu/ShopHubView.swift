@@ -17,6 +17,18 @@ final class ShopHubView: LobbyScreenView {
         "Pick a category. Changes apply on the next match.",
         style: .caption
     )
+    private let bubbleTile = ShopCategoryTile(
+        title: "Bubble Style",
+        subtitle: "",
+        previewImageNames: [],
+        previewIconSize: 44
+    )
+    private let cannonTile = ShopCategoryTile(
+        title: "Cannon Style",
+        subtitle: "",
+        previewImageNames: [],
+        previewIconSize: 144
+    )
 
     init() {
         super.init(screenTitle: "Shop")
@@ -33,6 +45,21 @@ final class ShopHubView: LobbyScreenView {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         balanceLabel.text = "\(formatter.string(from: NSNumber(value: state.softCurrency)) ?? "0") coins"
+        reloadSelectionPreviews()
+    }
+
+    private func reloadSelectionPreviews() {
+        let bubblePack = CosmeticSettings.bubbleSkinPack
+        bubbleTile.update(
+            subtitle: bubblePack.displayName,
+            previewImageNames: BubbleColor.allCases.map { bubblePack.spriteName(for: $0) }
+        )
+
+        let cannonSkin = CosmeticSettings.cannonSkin
+        cannonTile.update(
+            subtitle: cannonSkin.displayName,
+            previewImageNames: [cannonSkin.spriteName]
+        )
     }
 
     override func present(animated: Bool = true) {
@@ -61,27 +88,15 @@ final class ShopHubView: LobbyScreenView {
         balanceStack.spacing = 4
         balanceStack.alignment = .center
 
-        let bubbleTile = ShopCategoryTile(
-            title: "Bubble Style",
-            subtitle: "\(BubbleSkinPack.allCases.count) collections",
-            previewImageNames: BubbleColor.allCases.map {
-                BubbleSkinPack.classic.spriteName(for: $0)
-            },
-            previewIconSize: 44
-        )
         bubbleTile.addAction(UIAction { [weak self] _ in
             self?.onOpenBubbleStyles?()
         }, for: .touchUpInside)
 
-        let cannonTile = ShopCategoryTile(
-            title: "Cannon Style",
-            subtitle: "\(CannonSkin.allCases.count) cannons",
-            previewImageNames: [CannonSkin.standard.spriteName],
-            previewIconSize: 144
-        )
         cannonTile.addAction(UIAction { [weak self] _ in
             self?.onOpenCannonStyles?()
         }, for: .touchUpInside)
+
+        reloadSelectionPreviews()
 
         scrollStack.addArrangedSubview(balanceStack)
         scrollStack.setCustomSpacing(Theme.Metrics.spacingLarge, after: balanceStack)
@@ -97,19 +112,20 @@ final class ShopHubView: LobbyScreenView {
 
 private final class ShopCategoryTile: UIControl {
 
+    private let subtitleLabel = ArcadeLabel("", style: .caption)
+    private let previewStack = UIStackView()
+    private let previewIconSize: CGFloat
+
     init(
         title: String,
         subtitle: String,
         previewImageNames: [String],
         previewIconSize: CGFloat
     ) {
+        self.previewIconSize = previewIconSize
         super.init(frame: .zero)
-        configure(
-            title: title,
-            subtitle: subtitle,
-            previewImageNames: previewImageNames,
-            previewIconSize: previewIconSize
-        )
+        configure(title: title, previewIconSize: previewIconSize)
+        update(subtitle: subtitle, previewImageNames: previewImageNames)
     }
 
     @available(*, unavailable)
@@ -117,12 +133,15 @@ private final class ShopCategoryTile: UIControl {
         fatalError("init(coder:) has not been implemented")
     }
 
+    func update(subtitle: String, previewImageNames: [String]) {
+        subtitleLabel.text = subtitle
+        rebuildPreview(names: previewImageNames)
+    }
+
     // MARK: - Private
 
     private func configure(
         title: String,
-        subtitle: String,
-        previewImageNames: [String],
         previewIconSize: CGFloat
     ) {
         translatesAutoresizingMaskIntoConstraints = false
@@ -136,7 +155,7 @@ private final class ShopCategoryTile: UIControl {
         titleLabel.isUserInteractionEnabled = false
         Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.primary)
 
-        let subtitleLabel = ArcadeLabel(subtitle, style: .caption)
+        let subtitleLabel = self.subtitleLabel
         subtitleLabel.textAlignment = .left
         subtitleLabel.isUserInteractionEnabled = false
         Theme.Text.applyHUDLegibility(to: subtitleLabel, color: Theme.Text.muted)
@@ -159,23 +178,12 @@ private final class ShopCategoryTile: UIControl {
         header.isUserInteractionEnabled = false
         header.translatesAutoresizingMaskIntoConstraints = false
 
-        let previewStack = UIStackView()
         previewStack.axis = .horizontal
         previewStack.spacing = 4
         previewStack.alignment = .center
         previewStack.distribution = .fillEqually
         previewStack.isUserInteractionEnabled = false
         previewStack.translatesAutoresizingMaskIntoConstraints = false
-
-        for name in previewImageNames.prefix(6) {
-            let imageView = UIImageView(image: UIImage(named: name))
-            imageView.contentMode = .scaleAspectFit
-            imageView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                imageView.heightAnchor.constraint(equalToConstant: previewIconSize),
-            ])
-            previewStack.addArrangedSubview(imageView)
-        }
 
         addSubview(header)
         addSubview(previewStack)
@@ -195,5 +203,22 @@ private final class ShopCategoryTile: UIControl {
 
             heightAnchor.constraint(greaterThanOrEqualToConstant: previewIconSize + 72),
         ])
+    }
+
+    private func rebuildPreview(names: [String]) {
+        previewStack.arrangedSubviews.forEach {
+            previewStack.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        for name in names.prefix(6) {
+            let imageView = UIImageView(image: UIImage(named: name))
+            imageView.contentMode = .scaleAspectFit
+            imageView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                imageView.heightAnchor.constraint(equalToConstant: previewIconSize),
+            ])
+            previewStack.addArrangedSubview(imageView)
+        }
     }
 }

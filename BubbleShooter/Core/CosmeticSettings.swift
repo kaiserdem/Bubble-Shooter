@@ -102,12 +102,12 @@ enum CannonSkin: String, CaseIterable, Codable, Sendable {
         case .standard: -2
         case .gold: 12
         case .nebula: 14
-        case .solar: 12
+        case .solar: 19
         case .emerald: 10
         case .ruby: 8
         case .aurora: 10
         case .crystal: 12
-        case .copper: 10
+        case .copper: 14
         }
     }
 }
