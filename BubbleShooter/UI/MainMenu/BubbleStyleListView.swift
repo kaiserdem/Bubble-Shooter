@@ -18,7 +18,7 @@ final class BubbleStyleListView: LobbyScreenView {
     private var itemRows: [CosmeticStyleRow] = []
 
     init() {
-        super.init(screenTitle: "Bubble Style", headerLayout: .inline)
+        super.init(screenTitle: "Bubble Style")
         configureContent()
     }
 
@@ -47,6 +47,7 @@ final class BubbleStyleListView: LobbyScreenView {
 
     override func present(animated: Bool = true) {
         BubbleExplosionTextureCache.preload()
+        reloadFromStorage()
         SkillzProgressionService.shared.refresh { [weak self] _ in
             DispatchQueue.main.async {
                 self?.reloadFromStorage()
@@ -95,6 +96,7 @@ final class BubbleStyleListView: LobbyScreenView {
                 guard let self else { return }
                 switch result {
                 case .success:
+                    item.applyEquippedCosmetic()
                     self.reloadFromStorage()
                 case .failure(let error):
                     self.onPurchaseFailed?(error.localizedDescription)

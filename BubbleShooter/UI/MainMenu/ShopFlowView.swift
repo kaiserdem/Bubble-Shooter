@@ -75,12 +75,22 @@ final class ShopFlowView: UIView {
         bubbleStyleList.onBack = { [weak self] in
             self?.closeScreen(self?.bubbleStyleList, returnTo: self?.shopHub) {
                 self?.shopHub.reloadFromProgression()
+                SkillzProgressionService.shared.refresh { _ in
+                    DispatchQueue.main.async {
+                        self?.shopHub.reloadFromProgression()
+                    }
+                }
             }
         }
 
         cannonStyleList.onBack = { [weak self] in
             self?.closeScreen(self?.cannonStyleList, returnTo: self?.shopHub) {
                 self?.shopHub.reloadFromProgression()
+                SkillzProgressionService.shared.refresh { _ in
+                    DispatchQueue.main.async {
+                        self?.shopHub.reloadFromProgression()
+                    }
+                }
             }
         }
 

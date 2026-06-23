@@ -19,7 +19,7 @@ final class CannonStyleListView: LobbyScreenView {
     private let displayedSkins = CannonSkin.shopDisplayOrder
 
     init() {
-        super.init(screenTitle: "Cannon Style", headerLayout: .inline)
+        super.init(screenTitle: "Cannon Style")
         configureContent()
     }
 
@@ -47,6 +47,7 @@ final class CannonStyleListView: LobbyScreenView {
     }
 
     override func present(animated: Bool = true) {
+        reloadFromStorage()
         SkillzProgressionService.shared.refresh { [weak self] _ in
             DispatchQueue.main.async {
                 self?.reloadFromStorage()
@@ -96,6 +97,7 @@ final class CannonStyleListView: LobbyScreenView {
                 guard let self else { return }
                 switch result {
                 case .success:
+                    item.applyEquippedCosmetic()
                     self.reloadFromStorage()
                 case .failure(let error):
                     self.onPurchaseFailed?(error.localizedDescription)

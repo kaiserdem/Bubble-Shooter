@@ -39,22 +39,24 @@ final class SkillzProgressionService {
     // MARK: - Public
 
     func refresh(completion: @escaping (Result<PlayerProgressionState, Error>) -> Void) {
+        let local = loadMockState()
+        state = local
+
         #if USE_SKILLZ_SDK
         fetchFromSkillz { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let remote):
-                self.state = remote
-                self.saveMockState(remote)
-                completion(.success(remote))
+                let merged = local.merged(withRemote: remote)
+                self.state = merged
+                self.saveMockState(merged)
+                completion(.success(merged))
             case .failure:
-                let local = self.loadMockState()
                 self.state = local
                 completion(.success(local))
             }
         }
         #else
-        state = loadMockState()
         completion(.success(state))
         #endif
     }
@@ -83,8 +85,10 @@ final class SkillzProgressionService {
                 self.state = next
                 self.saveMockState(next)
                 completion(.success(next))
-            case .failure(let error):
-                completion(.failure(error))
+            case .failure:
+                self.state = next
+                self.saveMockState(next)
+                completion(.success(next))
             }
         }
         #else
@@ -129,7 +133,7 @@ final class SkillzProgressionService {
             withKeys: keys,
             withSuccess: { userData in
                 guard let userData else {
-                    completion(.success(PlayerProgressionState.initial))
+                    completion(.failure(SkillzProgressionError.remote("No progression data")))
                     return
                 }
                 completion(.success(PlayerProgressionState.fromProgressionDictionary(userData)))

@@ -131,6 +131,25 @@ struct PlayerProgressionState: Equatable, Sendable {
         [ProgressionKeys.softCurrency: softCurrency]
     }
 
+    /// Keeps local purchases when Skillz still returns sandbox defaults.
+    func merged(withRemote remote: PlayerProgressionState) -> PlayerProgressionState {
+        PlayerProgressionState(
+            softCurrency: min(softCurrency, remote.softCurrency),
+            ownedBubbleRibbon: ownedBubbleRibbon || remote.ownedBubbleRibbon,
+            ownedBubbleShimmer: ownedBubbleShimmer || remote.ownedBubbleShimmer,
+            ownedBubblePlanet: ownedBubblePlanet || remote.ownedBubblePlanet,
+            ownedBubbleGlossy: ownedBubbleGlossy || remote.ownedBubbleGlossy,
+            ownedCannonGold: ownedCannonGold || remote.ownedCannonGold,
+            ownedCannonNebula: ownedCannonNebula || remote.ownedCannonNebula,
+            ownedCannonSolar: ownedCannonSolar || remote.ownedCannonSolar,
+            ownedCannonEmerald: ownedCannonEmerald || remote.ownedCannonEmerald,
+            ownedCannonRuby: ownedCannonRuby || remote.ownedCannonRuby,
+            ownedCannonAurora: ownedCannonAurora || remote.ownedCannonAurora,
+            ownedCannonCrystal: ownedCannonCrystal || remote.ownedCannonCrystal,
+            ownedCannonCopper: ownedCannonCopper || remote.ownedCannonCopper
+        )
+    }
+
     static func fromProgressionDictionary(_ dictionary: [AnyHashable: Any]) -> PlayerProgressionState {
         PlayerProgressionState(
             softCurrency: ProgressionValueParser.int(
@@ -267,6 +286,23 @@ enum CosmeticShopItem: CaseIterable, Sendable {
             [CannonSkin.crystal.spriteName]
         case .cannonCopper:
             [CannonSkin.copper.spriteName]
+        }
+    }
+
+    func applyEquippedCosmetic() {
+        switch self {
+        case .bubbleRibbon: CosmeticSettings.bubbleSkinPack = .ribbon
+        case .bubbleShimmer: CosmeticSettings.bubbleSkinPack = .shimmer
+        case .bubblePlanet: CosmeticSettings.bubbleSkinPack = .planet
+        case .bubbleGlossy: CosmeticSettings.bubbleSkinPack = .glossy
+        case .cannonGold: CosmeticSettings.cannonSkin = .gold
+        case .cannonNebula: CosmeticSettings.cannonSkin = .nebula
+        case .cannonSolar: CosmeticSettings.cannonSkin = .solar
+        case .cannonEmerald: CosmeticSettings.cannonSkin = .emerald
+        case .cannonRuby: CosmeticSettings.cannonSkin = .ruby
+        case .cannonAurora: CosmeticSettings.cannonSkin = .aurora
+        case .cannonCrystal: CosmeticSettings.cannonSkin = .crystal
+        case .cannonCopper: CosmeticSettings.cannonSkin = .copper
         }
     }
 }

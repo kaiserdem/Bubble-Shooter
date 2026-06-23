@@ -75,9 +75,10 @@ final class ShopHubView: LobbyScreenView {
 
     private func configureContent() {
         balanceCaption.textAlignment = .center
+        balanceCaption.font = Theme.Typography.body(20)
         balanceLabel.textAlignment = .center
         balanceLabel.textColor = Theme.Accent.gold
-        Theme.Text.applyHUDLegibility(to: balanceCaption, color: Theme.Text.muted)
+        Theme.Text.applyHUDLegibility(to: balanceCaption, color: Theme.Text.onDark)
 
         footnoteLabel.textAlignment = .center
         footnoteLabel.numberOfLines = 0
