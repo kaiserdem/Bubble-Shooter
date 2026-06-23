@@ -5,6 +5,11 @@
 
 import Foundation
 
+struct ShopPurchaseResult: Sendable {
+    let progression: PlayerProgressionState
+    let unlockedAchievements: [AchievementID]
+}
+
 enum SkillzProgressionError: LocalizedError {
     case notEnoughCoins
     case alreadyOwned
@@ -63,7 +68,7 @@ final class SkillzProgressionService {
 
     func purchase(
         _ item: CosmeticShopItem,
-        completion: @escaping (Result<PlayerProgressionState, Error>) -> Void
+        completion: @escaping (Result<ShopPurchaseResult, Error>) -> Void
     ) {
         guard !state.isOwned(item) else {
             completion(.failure(SkillzProgressionError.alreadyOwned))
@@ -84,20 +89,16 @@ final class SkillzProgressionService {
             case .success:
                 self.state = next
                 self.saveMockState(next)
-                AchievementService.shared.recordCosmeticPurchase { _ in }
-                completion(.success(next))
             case .failure:
                 self.state = next
                 self.saveMockState(next)
-                AchievementService.shared.recordCosmeticPurchase { _ in }
-                completion(.success(next))
             }
+            self.finishPurchase(completion: completion)
         }
         #else
         state = next
         saveMockState(next)
-        AchievementService.shared.recordCosmeticPurchase { _ in }
-        completion(.success(next))
+        finishPurchase(completion: completion)
         #endif
     }
 
@@ -146,6 +147,19 @@ final class SkillzProgressionService {
         saveMockState(next)
         completion(.success(next))
         #endif
+    }
+
+    private func finishPurchase(
+        completion: @escaping (Result<ShopPurchaseResult, Error>) -> Void
+    ) {
+        AchievementService.shared.recordCosmeticPurchase { [weak self] unlocked in
+            guard let self else { return }
+            let result = ShopPurchaseResult(
+                progression: self.state,
+                unlockedAchievements: unlocked
+            )
+            completion(.success(result))
+        }
     }
 
     // MARK: - Skillz

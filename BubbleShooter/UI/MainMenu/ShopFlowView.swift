@@ -14,6 +14,8 @@ final class ShopFlowView: UIView {
     private let shopHub = ShopHubView()
     private let bubbleStyleList = BubbleStyleListView()
     private let cannonStyleList = CannonStyleListView()
+    private let achievementOverlay = AchievementUnlockedOverlayView()
+    private var pendingAchievementPresentations: [AchievementID] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -45,7 +47,7 @@ final class ShopFlowView: UIView {
     private func configure() {
         translatesAutoresizingMaskIntoConstraints = false
 
-        for child in [shopHub, bubbleStyleList, cannonStyleList] {
+        for child in [shopHub, bubbleStyleList, cannonStyleList, achievementOverlay] {
             child.translatesAutoresizingMaskIntoConstraints = false
             addSubview(child)
             NSLayoutConstraint.activate([
@@ -101,6 +103,36 @@ final class ShopFlowView: UIView {
         cannonStyleList.onPurchaseFailed = { [weak self] message in
             self?.onPurchaseFailed?(message)
         }
+
+        let purchaseSucceeded: ([AchievementID]) -> Void = { [weak self] unlocked in
+            self?.presentUnlockedAchievements(unlocked)
+        }
+        bubbleStyleList.onPurchaseSucceeded = purchaseSucceeded
+        cannonStyleList.onPurchaseSucceeded = purchaseSucceeded
+    }
+
+    private func presentUnlockedAchievements(_ ids: [AchievementID]) {
+        guard !ids.isEmpty else { return }
+        pendingAchievementPresentations = ids
+        presentNextAchievement()
+    }
+
+    private func presentNextAchievement() {
+        guard let id = pendingAchievementPresentations.first else { return }
+
+        let definition = AchievementDefinition.definition(for: id)
+        bringSubviewToFront(achievementOverlay)
+        achievementOverlay.configure(definition: definition)
+        achievementOverlay.onDismiss = { [weak self] in
+            guard let self else { return }
+            self.pendingAchievementPresentations.removeFirst()
+            if self.pendingAchievementPresentations.isEmpty {
+                self.shopHub.reloadFromProgression()
+            } else {
+                self.presentNextAchievement()
+            }
+        }
+        achievementOverlay.present()
     }
 
     private func openScreen(_ screen: LobbyScreenView) {

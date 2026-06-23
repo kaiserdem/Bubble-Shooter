@@ -9,6 +9,7 @@ import UIKit
 final class BubbleStyleListView: LobbyScreenView {
 
     var onPurchaseFailed: ((String) -> Void)?
+    var onPurchaseSucceeded: (([AchievementID]) -> Void)?
 
     private let footnoteLabel = ArcadeLabel(
         "Earn \(PlayerProgressionState.matchCoinReward) coins after each match.",
@@ -95,9 +96,10 @@ final class BubbleStyleListView: LobbyScreenView {
             DispatchQueue.main.async {
                 guard let self else { return }
                 switch result {
-                case .success:
+                case .success(let purchaseResult):
                     item.applyEquippedCosmetic()
                     self.reloadFromStorage()
+                    self.onPurchaseSucceeded?(purchaseResult.unlockedAchievements)
                 case .failure(let error):
                     self.onPurchaseFailed?(error.localizedDescription)
                 }
