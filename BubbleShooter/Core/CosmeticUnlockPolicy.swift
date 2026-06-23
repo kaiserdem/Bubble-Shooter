@@ -24,6 +24,7 @@ enum CosmeticUnlockPolicy {
         case .shimmer: return progression.ownedBubbleShimmer
         case .planet: return progression.ownedBubblePlanet
         case .glossy: return progression.ownedBubbleGlossy
+        case .innerGlow: return progression.ownedBubbleInnerGlow
         }
     }
 
@@ -47,6 +48,7 @@ enum CosmeticUnlockPolicy {
         case .shimmer: .bubbleShimmer
         case .planet: .bubblePlanet
         case .glossy: .bubbleGlossy
+        case .innerGlow: .bubbleInnerGlow
         }
     }
 

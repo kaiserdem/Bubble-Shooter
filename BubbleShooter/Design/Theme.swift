@@ -28,6 +28,15 @@ enum Theme {
         enum Music {
             static let background = "81cebf7e45fdef7"
         }
+
+        enum Shop {
+            static let coin1 = "coin-1"
+            static let coin2 = "coin-2"
+            static let coin3 = "coin-3"
+            static let gift1 = "gift-1"
+            static let gift2 = "gift-2"
+            static let gift3 = "gift-3"
+        }
     }
 
     // MARK: - Backgrounds

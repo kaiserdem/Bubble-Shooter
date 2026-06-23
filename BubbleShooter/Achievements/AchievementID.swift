@@ -38,4 +38,23 @@ enum AchievementReward: Equatable, Sendable {
             item.displayName
         }
     }
+
+    var coinAmount: Int? {
+        if case .coins(let amount) = self { return amount }
+        return nil
+    }
+
+    var cosmeticItem: CosmeticShopItem? {
+        if case .cosmetic(let item) = self { return item }
+        return nil
+    }
+
+    var previewImageNames: [String] {
+        switch self {
+        case .coins:
+            []
+        case .cosmetic(let item):
+            item.previewImageNames
+        }
+    }
 }

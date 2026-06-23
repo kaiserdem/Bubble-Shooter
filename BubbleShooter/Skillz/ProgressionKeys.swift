@@ -15,6 +15,7 @@ enum ProgressionKeys {
     static let ownedBubbleShimmer = "owned_bubble_shimmer"
     static let ownedBubblePlanet = "owned_bubble_planet"
     static let ownedBubbleGlossy = "owned_bubble_glossy"
+    static let ownedBubbleInnerGlow = "owned_bubble_inner_glow"
     static let ownedCannonGold = "owned_cannon_gold"
     static let ownedCannonNebula = "owned_cannon_nebula"
     static let ownedCannonSolar = "owned_cannon_solar"
@@ -30,6 +31,7 @@ enum ProgressionKeys {
         ownedBubbleShimmer,
         ownedBubblePlanet,
         ownedBubbleGlossy,
+        ownedBubbleInnerGlow,
         ownedCannonGold,
         ownedCannonNebula,
         ownedCannonSolar,

@@ -228,12 +228,12 @@ final class ArcadeButton: UIControl {
             gradientLayer.isHidden = false
             gradientLayer.locations = nil
             gradientLayer.colors = [
-                UIColor(hex: 0x7AE8B8).cgColor,
-                Theme.Accent.primary.cgColor,
+                UIColor(hex: 0x7AEE9A).cgColor,
+                UIColor(hex: 0x2BBF9A).cgColor,
             ]
             gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
             gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
-            borderLayer.strokeColor = UIColor(hex: 0x8ED8FF).cgColor
+            borderLayer.strokeColor = UIColor(hex: 0x4ADFB5).cgColor
             Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.onDark)
 
         case .violet:
@@ -280,7 +280,7 @@ final class ArcadeButton: UIControl {
         case .primary: UIColor(hex: 0xFF9A2E)
         case .secondary: Theme.Accent.secondary
         case .gold: Theme.Accent.gold
-        case .aqua: Theme.Accent.primary
+        case .aqua: UIColor(hex: 0x3DD4A0)
         case .violet: UIColor(hex: 0xB46CFF)
         case .ghost: Theme.Surface.border
         case .danger: Theme.Accent.danger

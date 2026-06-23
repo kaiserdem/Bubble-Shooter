@@ -196,6 +196,7 @@ final class SkillzProgressionService {
             ownedBubbleShimmer: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedBubbleShimmer),
             ownedBubblePlanet: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedBubblePlanet),
             ownedBubbleGlossy: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedBubbleGlossy),
+            ownedBubbleInnerGlow: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedBubbleInnerGlow),
             ownedCannonGold: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonGold),
             ownedCannonNebula: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonNebula),
             ownedCannonSolar: defaults.bool(forKey: defaultsPrefix + ProgressionKeys.ownedCannonSolar),
@@ -213,6 +214,7 @@ final class SkillzProgressionService {
         defaults.set(state.ownedBubbleShimmer, forKey: defaultsPrefix + ProgressionKeys.ownedBubbleShimmer)
         defaults.set(state.ownedBubblePlanet, forKey: defaultsPrefix + ProgressionKeys.ownedBubblePlanet)
         defaults.set(state.ownedBubbleGlossy, forKey: defaultsPrefix + ProgressionKeys.ownedBubbleGlossy)
+        defaults.set(state.ownedBubbleInnerGlow, forKey: defaultsPrefix + ProgressionKeys.ownedBubbleInnerGlow)
         defaults.set(state.ownedCannonGold, forKey: defaultsPrefix + ProgressionKeys.ownedCannonGold)
         defaults.set(state.ownedCannonNebula, forKey: defaultsPrefix + ProgressionKeys.ownedCannonNebula)
         defaults.set(state.ownedCannonSolar, forKey: defaultsPrefix + ProgressionKeys.ownedCannonSolar)

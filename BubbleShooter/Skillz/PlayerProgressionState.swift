@@ -16,6 +16,7 @@ struct PlayerProgressionState: Equatable, Sendable {
     var ownedBubbleShimmer: Bool
     var ownedBubblePlanet: Bool
     var ownedBubbleGlossy: Bool
+    var ownedBubbleInnerGlow: Bool
     var ownedCannonGold: Bool
     var ownedCannonNebula: Bool
     var ownedCannonSolar: Bool
@@ -31,6 +32,7 @@ struct PlayerProgressionState: Equatable, Sendable {
         ownedBubbleShimmer: false,
         ownedBubblePlanet: false,
         ownedBubbleGlossy: false,
+        ownedBubbleInnerGlow: false,
         ownedCannonGold: false,
         ownedCannonNebula: false,
         ownedCannonSolar: false,
@@ -47,6 +49,7 @@ struct PlayerProgressionState: Equatable, Sendable {
         case .bubbleShimmer: ownedBubbleShimmer
         case .bubblePlanet: ownedBubblePlanet
         case .bubbleGlossy: ownedBubbleGlossy
+        case .bubbleInnerGlow: ownedBubbleInnerGlow
         case .cannonGold: ownedCannonGold
         case .cannonNebula: ownedCannonNebula
         case .cannonSolar: ownedCannonSolar
@@ -78,6 +81,7 @@ struct PlayerProgressionState: Equatable, Sendable {
         case .bubbleShimmer: ownedBubbleShimmer = true
         case .bubblePlanet: ownedBubblePlanet = true
         case .bubbleGlossy: ownedBubbleGlossy = true
+        case .bubbleInnerGlow: ownedBubbleInnerGlow = true
         case .cannonGold: ownedCannonGold = true
         case .cannonNebula: ownedCannonNebula = true
         case .cannonSolar: ownedCannonSolar = true
@@ -100,6 +104,7 @@ struct PlayerProgressionState: Equatable, Sendable {
         case .bubbleShimmer: ownedBubbleShimmer = true
         case .bubblePlanet: ownedBubblePlanet = true
         case .bubbleGlossy: ownedBubbleGlossy = true
+        case .bubbleInnerGlow: ownedBubbleInnerGlow = true
         case .cannonGold: ownedCannonGold = true
         case .cannonNebula: ownedCannonNebula = true
         case .cannonSolar: ownedCannonSolar = true
@@ -143,6 +148,8 @@ struct PlayerProgressionState: Equatable, Sendable {
             updates[ProgressionKeys.ownedBubblePlanet] = true
         case .bubbleGlossy:
             updates[ProgressionKeys.ownedBubbleGlossy] = true
+        case .bubbleInnerGlow:
+            updates[ProgressionKeys.ownedBubbleInnerGlow] = true
         case .cannonGold:
             updates[ProgressionKeys.ownedCannonGold] = true
         case .cannonNebula:
@@ -175,6 +182,7 @@ struct PlayerProgressionState: Equatable, Sendable {
             ownedBubbleShimmer: ownedBubbleShimmer || remote.ownedBubbleShimmer,
             ownedBubblePlanet: ownedBubblePlanet || remote.ownedBubblePlanet,
             ownedBubbleGlossy: ownedBubbleGlossy || remote.ownedBubbleGlossy,
+            ownedBubbleInnerGlow: ownedBubbleInnerGlow || remote.ownedBubbleInnerGlow,
             ownedCannonGold: ownedCannonGold || remote.ownedCannonGold,
             ownedCannonNebula: ownedCannonNebula || remote.ownedCannonNebula,
             ownedCannonSolar: ownedCannonSolar || remote.ownedCannonSolar,
@@ -202,6 +210,9 @@ struct PlayerProgressionState: Equatable, Sendable {
             ),
             ownedBubbleGlossy: ProgressionValueParser.bool(
                 from: dictionary[ProgressionKeys.ownedBubbleGlossy]
+            ),
+            ownedBubbleInnerGlow: ProgressionValueParser.bool(
+                from: dictionary[ProgressionKeys.ownedBubbleInnerGlow]
             ),
             ownedCannonGold: ProgressionValueParser.bool(
                 from: dictionary[ProgressionKeys.ownedCannonGold]
@@ -236,6 +247,7 @@ enum CosmeticShopItem: CaseIterable, Sendable {
     case bubbleShimmer
     case bubblePlanet
     case bubbleGlossy
+    case bubbleInnerGlow
     case cannonGold
     case cannonNebula
     case cannonSolar
@@ -251,6 +263,7 @@ enum CosmeticShopItem: CaseIterable, Sendable {
         case .bubbleShimmer: "Shimmer Bubbles"
         case .bubblePlanet: "Planet Bubbles"
         case .bubbleGlossy: "Glossy Bubbles"
+        case .bubbleInnerGlow: "Inner Glow Bubbles"
         case .cannonGold: CannonSkin.gold.displayName
         case .cannonNebula: CannonSkin.nebula.displayName
         case .cannonSolar: CannonSkin.solar.displayName
@@ -268,6 +281,7 @@ enum CosmeticShopItem: CaseIterable, Sendable {
         case .bubbleShimmer: 140
         case .bubblePlanet: 120
         case .bubbleGlossy: 180
+        case .bubbleInnerGlow: 200
         case .cannonCopper: 80
         case .cannonEmerald: 100
         case .cannonNebula: 110
@@ -285,6 +299,7 @@ enum CosmeticShopItem: CaseIterable, Sendable {
         case .bubbleShimmer: ProgressionKeys.ownedBubbleShimmer
         case .bubblePlanet: ProgressionKeys.ownedBubblePlanet
         case .bubbleGlossy: ProgressionKeys.ownedBubbleGlossy
+        case .bubbleInnerGlow: ProgressionKeys.ownedBubbleInnerGlow
         case .cannonGold: ProgressionKeys.ownedCannonGold
         case .cannonNebula: ProgressionKeys.ownedCannonNebula
         case .cannonSolar: ProgressionKeys.ownedCannonSolar
@@ -306,6 +321,8 @@ enum CosmeticShopItem: CaseIterable, Sendable {
             BubbleColor.allCases.map { BubbleSkinPack.planet.spriteName(for: $0) }
         case .bubbleGlossy:
             BubbleColor.allCases.map { BubbleSkinPack.glossy.spriteName(for: $0) }
+        case .bubbleInnerGlow:
+            BubbleColor.allCases.map { BubbleSkinPack.innerGlow.spriteName(for: $0) }
         case .cannonGold:
             [CannonSkin.gold.spriteName]
         case .cannonNebula:
@@ -331,6 +348,7 @@ enum CosmeticShopItem: CaseIterable, Sendable {
         case .bubbleShimmer: CosmeticSettings.bubbleSkinPack = .shimmer
         case .bubblePlanet: CosmeticSettings.bubbleSkinPack = .planet
         case .bubbleGlossy: CosmeticSettings.bubbleSkinPack = .glossy
+        case .bubbleInnerGlow: CosmeticSettings.bubbleSkinPack = .innerGlow
         case .cannonGold: CosmeticSettings.cannonSkin = .gold
         case .cannonNebula: CosmeticSettings.cannonSkin = .nebula
         case .cannonSolar: CosmeticSettings.cannonSkin = .solar

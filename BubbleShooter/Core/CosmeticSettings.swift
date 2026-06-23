@@ -13,6 +13,7 @@ enum BubbleSkinPack: String, CaseIterable, Codable, Sendable {
     case shimmer
     case planet
     case glossy
+    case innerGlow
 
     var displayName: String {
         switch self {
@@ -21,6 +22,7 @@ enum BubbleSkinPack: String, CaseIterable, Codable, Sendable {
         case .shimmer: "Shimmer"
         case .planet: "Planet"
         case .glossy: "Glossy"
+        case .innerGlow: "Inner Glow"
         }
     }
 
@@ -36,6 +38,8 @@ enum BubbleSkinPack: String, CaseIterable, Codable, Sendable {
             return "Collection4/\(color.assetColorName)-4"
         case .glossy:
             return "Collection5/\(color.assetColorName)-5"
+        case .innerGlow:
+            return "Collection6/\(color.assetColorName)-6"
         }
     }
 }
