@@ -8,6 +8,7 @@ Icon
 # Xcode
 build/
 DerivedData/
+.derivedData/
 *.xcuserstate
 *.xccheckout
 *.xcscmblueprint
@@ -18,20 +19,23 @@ DerivedData/
 *.dSYM.zip
 *.swp
 *~.nib
+*.app
+Timeline/
 
 # Xcode user-specific data
 xcuserdata/
 *.xcuserdatad/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcworkspace/xcuserdata/
 
 # Swift Package Manager
 .build/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-Package.resolved
+# Keep Package.resolved ignored only for libraries; uncomment to commit for app SPM deps.
 
-# CocoaPods
+# CocoaPods — Pods/ is regenerated; Podfile.lock should be committed for apps.
 Pods/
-Podfile.lock
 
 # Carthage
 Carthage/Build/
@@ -46,8 +50,6 @@ fastlane/test_output
 Vendor/Skillz/
 Skillz.framework/
 Skillz.xcframework/
-*.framework/
-*.xcframework/
 
 # Secrets / env
 .env

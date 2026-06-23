@@ -1,0 +1,28 @@
+PODS:
+  - Apple-Cocoapod-KochavaCore (6.1.1)
+  - Apple-Cocoapod-KochavaTracker (6.1.1):
+    - Apple-Cocoapod-KochavaCore (~> 6.1.1)
+  - OpenTelemetrySwiftApi (1.6.0)
+  - Skillz (2025.0.50):
+    - Apple-Cocoapod-KochavaTracker (= 6.1.1)
+    - OpenTelemetrySwiftApi (= 1.6.0)
+
+DEPENDENCIES:
+  - Skillz (= 2025.0.50)
+
+SPEC REPOS:
+  trunk:
+    - Apple-Cocoapod-KochavaCore
+    - Apple-Cocoapod-KochavaTracker
+    - OpenTelemetrySwiftApi
+    - Skillz
+
+SPEC CHECKSUMS:
+  Apple-Cocoapod-KochavaCore: b0255a5cd156e70e8b9ba20d57ef779d7490e9c2
+  Apple-Cocoapod-KochavaTracker: 2210a65088070f5775e1a625664efdbd8e114856
+  OpenTelemetrySwiftApi: 657da8071c2908caecce11548e006f779924ff9c
+  Skillz: 9b1db590db00e95eb700070f622d213235f93552
+
+PODFILE CHECKSUM: fbaeb2a23fbdfdd168e038db304eb42158055c9c
+
+COCOAPODS: 1.16.2

@@ -246,16 +246,6 @@ private extension GameScene {
             configuration: configuration
         )
 
-        #if DEBUG
-        GridDebugPrinter.logShot(
-            hit: path.hit,
-            shotBubble: shotBubble,
-            grid: grid,
-            configuration: configuration,
-            analysis: snapAnalysis
-        )
-        #endif
-
         if let snapPosition = snapAnalysis.chosen {
             do {
                 try grid.place(shotBubble, at: snapPosition)
@@ -286,15 +276,6 @@ private extension GameScene {
         parameters: MatchGameplayParameters
     ) {
         if let group = MatchFinder.matchingGroup(including: position, in: grid) {
-            #if DEBUG
-            GridDebugPrinter.logMatchResult(
-                at: position,
-                grid: grid,
-                configuration: configuration,
-                group: group
-            )
-            #endif
-
             matchScore.addPop(bubbleCount: group.count)
             let popSpecs = popSpecs(
                 for: group,
@@ -313,15 +294,6 @@ private extension GameScene {
             ScoreFloater.play(points: popPoints, near: popSpecs, kind: .pop, in: self)
             HapticsPlayer.playLight()
             SoundEffectsPlayer.playPop()
-        } else {
-            #if DEBUG
-            GridDebugPrinter.logMatchResult(
-                at: position,
-                grid: grid,
-                configuration: configuration,
-                group: nil
-            )
-            #endif
         }
 
         let floating = ConnectivityChecker.floatingPositions(in: grid)
