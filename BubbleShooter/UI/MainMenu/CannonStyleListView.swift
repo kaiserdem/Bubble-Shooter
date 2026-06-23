@@ -66,7 +66,7 @@ final class CannonStyleListView: LobbyScreenView {
         itemsStack.translatesAutoresizingMaskIntoConstraints = false
 
         for skin in CannonSkin.allCases {
-            let row = CosmeticStyleRow(previewLayout: .singleCentered, previewIconSize: 112)
+            let row = CosmeticStyleRow(previewLayout: .singleCentered, previewIconSize: 124)
             row.onEquipTapped = { [weak self] in
                 guard CosmeticUnlockPolicy.canEquip(skin) else { return }
                 self?.equip(skin)

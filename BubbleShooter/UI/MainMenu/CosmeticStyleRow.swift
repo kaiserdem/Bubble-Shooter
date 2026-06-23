@@ -130,15 +130,20 @@ final class CosmeticStyleRow: UIView {
         actionContainer.translatesAutoresizingMaskIntoConstraints = false
         configureActions()
 
-        let padding = Theme.Metrics.spacingMedium
-        let previewHeight = previewIconSize + Theme.Metrics.spacingMedium
-
         switch previewLayout {
         case .bubbleStrip:
+            let padding = Theme.Metrics.spacingMedium
+            let previewHeight = previewIconSize + Theme.Metrics.spacingMedium
             configureBubbleLayout(padding: padding, previewHeight: previewHeight)
         case .singleCentered:
-            configureCannonLayout(padding: padding, previewHeight: previewHeight)
+            configureCannonLayout()
         }
+    }
+
+    private enum ActionSlotMetrics {
+        static let height = Theme.Metrics.compactButtonHeight
+        /// Fits the wider "Equip" compact label without resizing between states.
+        static let cannonWidth: CGFloat = 84
     }
 
     private func configureActions() {
@@ -146,35 +151,67 @@ final class CosmeticStyleRow: UIView {
 
         switch previewLayout {
         case .bubbleStrip:
-            let buttons = UIStackView(arrangedSubviews: [equippedBadge, equipButton, buyButton])
-            buttons.axis = .horizontal
-            buttons.spacing = Theme.Metrics.spacingSmall
-            buttons.alignment = .center
-            buttons.distribution = .fillEqually
-            buttons.translatesAutoresizingMaskIntoConstraints = false
-            actionContainer.addSubview(buttons)
-            NSLayoutConstraint.activate([
-                buttons.leadingAnchor.constraint(equalTo: actionContainer.leadingAnchor),
-                buttons.trailingAnchor.constraint(equalTo: actionContainer.trailingAnchor),
-                buttons.topAnchor.constraint(equalTo: actionContainer.topAnchor),
-                buttons.bottomAnchor.constraint(equalTo: actionContainer.bottomAnchor),
-                actionContainer.heightAnchor.constraint(equalToConstant: 40),
-            ])
-
+            configureActionSlot(fixedWidth: nil)
         case .singleCentered:
-            let buttons = UIStackView(arrangedSubviews: [equippedBadge, equipButton, buyButton])
-            buttons.axis = .vertical
-            buttons.spacing = Theme.Metrics.spacingSmall
-            buttons.alignment = .trailing
-            buttons.translatesAutoresizingMaskIntoConstraints = false
-            actionContainer.addSubview(buttons)
-            NSLayoutConstraint.activate([
-                buttons.leadingAnchor.constraint(equalTo: actionContainer.leadingAnchor),
-                buttons.trailingAnchor.constraint(equalTo: actionContainer.trailingAnchor),
-                buttons.topAnchor.constraint(equalTo: actionContainer.topAnchor),
-                buttons.bottomAnchor.constraint(equalTo: actionContainer.bottomAnchor),
-            ])
+            configureActionSlot(fixedWidth: ActionSlotMetrics.cannonWidth)
         }
+    }
+
+    private func configureActionSlot(fixedWidth: CGFloat?) {
+        let slot = UIView()
+        slot.translatesAutoresizingMaskIntoConstraints = false
+        slot.isUserInteractionEnabled = true
+
+        equippedBadge.translatesAutoresizingMaskIntoConstraints = false
+        equipButton.translatesAutoresizingMaskIntoConstraints = false
+        buyButton.translatesAutoresizingMaskIntoConstraints = false
+        equipButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        buyButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        equipButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        buyButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        slot.addSubview(equipButton)
+        slot.addSubview(buyButton)
+        slot.addSubview(equippedBadge)
+        actionContainer.addSubview(slot)
+
+        let pinToSlot = { (view: UIView) in
+            [
+                view.leadingAnchor.constraint(equalTo: slot.leadingAnchor),
+                view.trailingAnchor.constraint(equalTo: slot.trailingAnchor),
+                view.topAnchor.constraint(equalTo: slot.topAnchor),
+                view.bottomAnchor.constraint(equalTo: slot.bottomAnchor),
+            ]
+        }
+
+        var constraints =
+            pinToSlot(equipButton)
+            + pinToSlot(buyButton)
+            + [
+                slot.topAnchor.constraint(equalTo: actionContainer.topAnchor),
+                slot.bottomAnchor.constraint(equalTo: actionContainer.bottomAnchor),
+                slot.heightAnchor.constraint(equalToConstant: ActionSlotMetrics.height),
+
+                equippedBadge.centerXAnchor.constraint(equalTo: slot.centerXAnchor),
+                equippedBadge.centerYAnchor.constraint(equalTo: slot.centerYAnchor),
+                equippedBadge.heightAnchor.constraint(equalToConstant: ActionSlotMetrics.height),
+            ]
+
+        if let fixedWidth {
+            constraints += [
+                slot.leadingAnchor.constraint(equalTo: actionContainer.leadingAnchor),
+                slot.trailingAnchor.constraint(equalTo: actionContainer.trailingAnchor),
+                slot.widthAnchor.constraint(equalToConstant: fixedWidth),
+                actionContainer.widthAnchor.constraint(equalToConstant: fixedWidth),
+            ]
+        } else {
+            constraints += [
+                slot.leadingAnchor.constraint(equalTo: actionContainer.leadingAnchor),
+                slot.trailingAnchor.constraint(equalTo: actionContainer.trailingAnchor),
+            ]
+        }
+
+        NSLayoutConstraint.activate(constraints)
     }
 
     private func configureBubbleLayout(padding: CGFloat, previewHeight: CGFloat) {
@@ -211,10 +248,13 @@ final class CosmeticStyleRow: UIView {
         ])
     }
 
-    private func configureCannonLayout(padding: CGFloat, previewHeight: CGFloat) {
+    private func configureCannonLayout() {
+        let padding = Theme.Metrics.spacingSmall
+        let headerPreviewGap: CGFloat = 4
+
         let textStack = UIStackView(arrangedSubviews: [titleLabel, statusLabel])
         textStack.axis = .vertical
-        textStack.spacing = 4
+        textStack.spacing = 2
         textStack.alignment = .leading
         textStack.isUserInteractionEnabled = false
 
@@ -235,9 +275,9 @@ final class CosmeticStyleRow: UIView {
 
             previewContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
             previewContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
-            previewContainer.topAnchor.constraint(equalTo: header.bottomAnchor, constant: Theme.Metrics.spacingSmall),
+            previewContainer.topAnchor.constraint(equalTo: header.bottomAnchor, constant: headerPreviewGap),
             previewContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -padding),
-            previewContainer.heightAnchor.constraint(equalToConstant: previewHeight),
+            previewContainer.heightAnchor.constraint(equalToConstant: previewIconSize),
 
             previewStack.leadingAnchor.constraint(equalTo: previewContainer.leadingAnchor),
             previewStack.trailingAnchor.constraint(equalTo: previewContainer.trailingAnchor),
