@@ -84,16 +84,19 @@ final class SkillzProgressionService {
             case .success:
                 self.state = next
                 self.saveMockState(next)
+                AchievementService.shared.recordCosmeticPurchase { _ in }
                 completion(.success(next))
             case .failure:
                 self.state = next
                 self.saveMockState(next)
+                AchievementService.shared.recordCosmeticPurchase { _ in }
                 completion(.success(next))
             }
         }
         #else
         state = next
         saveMockState(next)
+        AchievementService.shared.recordCosmeticPurchase { _ in }
         completion(.success(next))
         #endif
     }
@@ -115,6 +118,28 @@ final class SkillzProgressionService {
                 self.saveMockState(next)
                 completion(.success(next))
             }
+        }
+        #else
+        state = next
+        saveMockState(next)
+        completion(.success(next))
+        #endif
+    }
+
+    func grantAchievementReward(
+        coins: Int,
+        cosmetic: CosmeticShopItem?,
+        completion: @escaping (Result<PlayerProgressionState, Error>) -> Void
+    ) {
+        var next = state
+        next.grantAchievementReward(coins: coins, cosmetic: cosmetic)
+
+        #if USE_SKILLZ_SDK
+        pushToSkillz(updates: state.achievementRewardUpdates(coins: coins, cosmetic: cosmetic)) { [weak self] result in
+            guard let self else { return }
+            self.state = next
+            self.saveMockState(next)
+            completion(.success(next))
         }
         #else
         state = next

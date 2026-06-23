@@ -12,6 +12,7 @@ final class ArcadeButton: UIControl {
         case primary
         case secondary
         case gold
+        case aqua
         case violet
         case ghost
         case danger
@@ -223,6 +224,18 @@ final class ArcadeButton: UIControl {
             borderLayer.strokeColor = Theme.Accent.gold.cgColor
             Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.onDark)
 
+        case .aqua:
+            gradientLayer.isHidden = false
+            gradientLayer.locations = nil
+            gradientLayer.colors = [
+                UIColor(hex: 0x7AE8B8).cgColor,
+                Theme.Accent.primary.cgColor,
+            ]
+            gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+            gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+            borderLayer.strokeColor = UIColor(hex: 0x8ED8FF).cgColor
+            Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.onDark)
+
         case .violet:
             gradientLayer.isHidden = false
             gradientLayer.locations = nil
@@ -267,6 +280,7 @@ final class ArcadeButton: UIControl {
         case .primary: UIColor(hex: 0xFF9A2E)
         case .secondary: Theme.Accent.secondary
         case .gold: Theme.Accent.gold
+        case .aqua: Theme.Accent.primary
         case .violet: UIColor(hex: 0xB46CFF)
         case .ghost: Theme.Surface.border
         case .danger: Theme.Accent.danger

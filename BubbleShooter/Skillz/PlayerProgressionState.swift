@@ -94,6 +94,42 @@ struct PlayerProgressionState: Equatable, Sendable {
         softCurrency += Self.matchCoinReward
     }
 
+    mutating func grantFreeUnlock(_ item: CosmeticShopItem) {
+        switch item {
+        case .bubbleRibbon: ownedBubbleRibbon = true
+        case .bubbleShimmer: ownedBubbleShimmer = true
+        case .bubblePlanet: ownedBubblePlanet = true
+        case .bubbleGlossy: ownedBubbleGlossy = true
+        case .cannonGold: ownedCannonGold = true
+        case .cannonNebula: ownedCannonNebula = true
+        case .cannonSolar: ownedCannonSolar = true
+        case .cannonEmerald: ownedCannonEmerald = true
+        case .cannonRuby: ownedCannonRuby = true
+        case .cannonAurora: ownedCannonAurora = true
+        case .cannonCrystal: ownedCannonCrystal = true
+        case .cannonCopper: ownedCannonCopper = true
+        }
+    }
+
+    mutating func grantAchievementReward(coins: Int, cosmetic: CosmeticShopItem?) {
+        softCurrency += max(0, coins)
+        if let cosmetic {
+            grantFreeUnlock(cosmetic)
+        }
+    }
+
+    func achievementRewardUpdates(coins: Int, cosmetic: CosmeticShopItem?) -> [String: Any] {
+        var next = self
+        next.grantAchievementReward(coins: coins, cosmetic: cosmetic)
+        var updates: [String: Any] = [
+            ProgressionKeys.softCurrency: next.softCurrency,
+        ]
+        if let cosmetic {
+            updates[cosmetic.progressionKey] = true
+        }
+        return updates
+    }
+
     func progressionUpdates(for item: CosmeticShopItem) -> [String: Any] {
         var updates: [String: Any] = [
             ProgressionKeys.softCurrency: softCurrency,

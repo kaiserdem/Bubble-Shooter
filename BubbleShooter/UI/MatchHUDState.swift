@@ -36,6 +36,14 @@ struct MatchResultsState: Equatable {
     var didClearBoard: Bool
     var didLoseOnDanger: Bool
 
+    var poppedBubbleCount: Int {
+        popPoints / ScoreCalculator.pointsPerPopBubble
+    }
+
+    var droppedBubbleCount: Int {
+        dropPoints / ScoreCalculator.pointsPerDropBubble
+    }
+
     static let preview = MatchResultsState(
         finalScore: 18_750,
         popPoints: 12_400,

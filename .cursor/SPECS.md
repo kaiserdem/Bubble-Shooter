@@ -4,6 +4,7 @@
 |------|--------|-------------|
 | [game/bubble_shooter_skillz.md](specs/game/bubble_shooter_skillz.md) | In Progress (Step 1 done) | Повне ТЗ: механіка, архітектура, покроковий план |
 | [design/visual_style_guide.md](specs/design/visual_style_guide.md) | Active | Cosmic Pop: палітра, компоненти, правила UI |
+| [meta/achievements.md](specs/meta/achievements.md) | Active | Досягнення: каталог, трекінг, нагороди, UI |
 
 ## Quick Links
 

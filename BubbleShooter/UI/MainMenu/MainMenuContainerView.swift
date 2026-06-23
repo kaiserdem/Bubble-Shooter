@@ -14,6 +14,7 @@ final class MainMenuContainerView: UIView {
     private let howToPlay = HowToPlayView()
     private let settings = SettingsView()
     private let shopFlow = ShopFlowView()
+    private let achievementsList = AchievementsListView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -30,7 +31,7 @@ final class MainMenuContainerView: UIView {
     private func configure() {
         translatesAutoresizingMaskIntoConstraints = false
 
-        for child in [mainMenu, howToPlay, settings, shopFlow] {
+        for child in [mainMenu, howToPlay, settings, shopFlow, achievementsList] {
             child.translatesAutoresizingMaskIntoConstraints = false
             addSubview(child)
             NSLayoutConstraint.activate([
@@ -61,12 +62,22 @@ final class MainMenuContainerView: UIView {
             self.shopFlow.present()
         }
 
+        mainMenu.onAchievements = { [weak self] in
+            guard let self else { return }
+            self.bringSubviewToFront(self.achievementsList)
+            self.achievementsList.present()
+        }
+
         howToPlay.onBack = { [weak self] in
             self?.closeScreen(self?.howToPlay, returnTo: self?.mainMenu)
         }
 
         settings.onBack = { [weak self] in
             self?.closeScreen(self?.settings, returnTo: self?.mainMenu)
+        }
+
+        achievementsList.onBack = { [weak self] in
+            self?.closeScreen(self?.achievementsList, returnTo: self?.mainMenu)
         }
 
         shopFlow.onBack = { [weak self] in

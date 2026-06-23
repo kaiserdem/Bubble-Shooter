@@ -282,8 +282,10 @@ extension GameViewController: GameSceneHUDDelegate {
         #endif
 
         SkillzProgressionService.shared.grantMatchReward { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.matchResultsView?.present(with: results)
+            AchievementService.shared.recordMatch(results: results) { _ in
+                DispatchQueue.main.async {
+                    self?.matchResultsView?.present(with: results)
+                }
             }
         }
     }

@@ -11,6 +11,7 @@ final class MainMenuView: UIView {
     var onPlay: (() -> Void)?
     var onHowToPlay: (() -> Void)?
     var onShop: (() -> Void)?
+    var onAchievements: (() -> Void)?
     var onSettings: (() -> Void)?
 
     private let backgroundView = ImageBackgroundView(named: Theme.Asset.Background.lobby)
@@ -20,6 +21,7 @@ final class MainMenuView: UIView {
     private let playButton = ArcadeButton(title: "Play", style: .primary)
     private let howToPlayButton = ArcadeButton(title: "How to Play", style: .secondary)
     private let shopButton = ArcadeButton(title: "Shop", style: .gold)
+    private let achievementsButton = ArcadeButton(title: "Achievements", style: .aqua)
     private let settingsButton = ArcadeButton(title: "Settings", style: .violet)
 
     override init(frame: CGRect) {
@@ -54,11 +56,15 @@ final class MainMenuView: UIView {
             self?.onShop?()
         }, for: .touchUpInside)
 
+        achievementsButton.addAction(UIAction { [weak self] _ in
+            self?.onAchievements?()
+        }, for: .touchUpInside)
+
         settingsButton.addAction(UIAction { [weak self] _ in
             self?.onSettings?()
         }, for: .touchUpInside)
 
-        let utilityRow = UIStackView(arrangedSubviews: [shopButton, settingsButton])
+        let utilityRow = UIStackView(arrangedSubviews: [shopButton, achievementsButton, settingsButton])
         utilityRow.axis = .vertical
         utilityRow.spacing = Theme.Metrics.spacingMedium
         utilityRow.distribution = .fill
