@@ -103,7 +103,7 @@ class LobbyScreenView: UIView {
         }, for: .touchUpInside)
 
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.showsVerticalScrollIndicator = true
+        scrollView.showsVerticalScrollIndicator = false
         scrollView.delaysContentTouches = false
         scrollView.alwaysBounceVertical = true
         scrollView.backgroundColor = .clear

@@ -66,11 +66,11 @@ final class CannonStyleListView: LobbyScreenView {
         itemsStack.translatesAutoresizingMaskIntoConstraints = false
 
         for skin in CannonSkin.allCases {
-            let row = CosmeticStyleRow(previewIconSize: 112)
-            row.addAction(UIAction { [weak self] _ in
+            let row = CosmeticStyleRow(previewLayout: .singleCentered, previewIconSize: 112)
+            row.onEquipTapped = { [weak self] in
                 guard CosmeticUnlockPolicy.canEquip(skin) else { return }
                 self?.equip(skin)
-            }, for: .touchUpInside)
+            }
             row.onBuyTapped = { [weak self] item in
                 self?.purchase(item)
             }

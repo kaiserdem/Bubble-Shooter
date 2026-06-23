@@ -62,15 +62,14 @@ final class BubbleStyleListView: LobbyScreenView {
         Theme.Text.applyHUDLegibility(to: footnoteLabel, color: Theme.Text.muted)
 
         itemsStack.axis = .vertical
-        itemsStack.spacing = Theme.Metrics.spacingMedium
+        itemsStack.spacing = Theme.Metrics.spacingLarge
         itemsStack.translatesAutoresizingMaskIntoConstraints = false
-
         for pack in BubbleSkinPack.allCases {
-            let row = CosmeticStyleRow(previewIconSize: 48)
-            row.addAction(UIAction { [weak self] _ in
+            let row = CosmeticStyleRow(previewLayout: .bubbleStrip, previewIconSize: 56)
+            row.onEquipTapped = { [weak self] in
                 guard CosmeticUnlockPolicy.canEquip(pack) else { return }
                 self?.equip(pack)
-            }, for: .touchUpInside)
+            }
             row.onBuyTapped = { [weak self] item in
                 self?.purchase(item)
             }

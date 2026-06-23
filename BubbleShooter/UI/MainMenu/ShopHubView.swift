@@ -163,6 +163,7 @@ private final class ShopCategoryTile: UIControl {
         previewStack.axis = .horizontal
         previewStack.spacing = 4
         previewStack.alignment = .center
+        previewStack.distribution = .fillEqually
         previewStack.isUserInteractionEnabled = false
         previewStack.translatesAutoresizingMaskIntoConstraints = false
 
@@ -171,7 +172,6 @@ private final class ShopCategoryTile: UIControl {
             imageView.contentMode = .scaleAspectFit
             imageView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
-                imageView.widthAnchor.constraint(equalToConstant: previewIconSize),
                 imageView.heightAnchor.constraint(equalToConstant: previewIconSize),
             ])
             previewStack.addArrangedSubview(imageView)
@@ -187,15 +187,8 @@ private final class ShopCategoryTile: UIControl {
             header.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Theme.Metrics.spacingMedium),
             header.topAnchor.constraint(equalTo: topAnchor, constant: Theme.Metrics.spacingMedium),
 
-            previewStack.leadingAnchor.constraint(
-                greaterThanOrEqualTo: leadingAnchor,
-                constant: Theme.Metrics.spacingMedium
-            ),
-            previewStack.trailingAnchor.constraint(
-                lessThanOrEqualTo: trailingAnchor,
-                constant: -Theme.Metrics.spacingMedium
-            ),
-            previewStack.centerXAnchor.constraint(equalTo: centerXAnchor),
+            previewStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Theme.Metrics.spacingMedium),
+            previewStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Theme.Metrics.spacingMedium),
             previewStack.topAnchor.constraint(equalTo: header.bottomAnchor, constant: Theme.Metrics.spacingSmall),
             previewStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Theme.Metrics.spacingMedium),
             previewStack.heightAnchor.constraint(equalToConstant: previewHeight),
