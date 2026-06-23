@@ -19,7 +19,7 @@ final class BubbleStyleListView: LobbyScreenView {
     private var itemRows: [CosmeticStyleRow] = []
 
     init() {
-        super.init(screenTitle: "Bubble Style")
+        super.init(screenTitle: "Bubble Style", headerLayout: .shop)
         configureContent()
     }
 
@@ -30,6 +30,7 @@ final class BubbleStyleListView: LobbyScreenView {
 
     func reloadFromStorage() {
         let state = SkillzProgressionService.shared.state
+        updateShopBalance(state.softCurrency)
         let selected = CosmeticSettings.bubbleSkinPack
 
         for (row, pack) in zip(itemRows, BubbleSkinPack.allCases) {

@@ -128,6 +128,8 @@ final class ShopFlowView: UIView {
             self.pendingAchievementPresentations.removeFirst()
             if self.pendingAchievementPresentations.isEmpty {
                 self.shopHub.reloadFromProgression()
+                self.bubbleStyleList.reloadFromStorage()
+                self.cannonStyleList.reloadFromStorage()
             } else {
                 self.presentNextAchievement()
             }

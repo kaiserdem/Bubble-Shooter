@@ -13,6 +13,8 @@ class LobbyScreenView: UIView {
         case stacked
         /// Back and title share one horizontal row.
         case inline
+        /// Back on the left, coin balance centered on the same row.
+        case shop
     }
 
     var onBack: (() -> Void)?
@@ -22,6 +24,7 @@ class LobbyScreenView: UIView {
 
     private let backgroundView = ImageBackgroundView(named: Theme.Asset.Background.lobby)
     private let backButton = ArcadeButton(title: "Back", style: .ghost, size: .compact)
+    private let shopBalanceView: ShopCoinBalanceView?
     private let titleLabel: ArcadeLabel
     private let card = GlassCardView()
     private let headerLayout: HeaderLayout
@@ -29,9 +32,14 @@ class LobbyScreenView: UIView {
 
     init(screenTitle: String, headerLayout: HeaderLayout = .stacked) {
         self.headerLayout = headerLayout
+        shopBalanceView = headerLayout == .shop ? ShopCoinBalanceView() : nil
         titleLabel = ArcadeLabel(screenTitle, style: .title)
         super.init(frame: .zero)
         configureChrome()
+    }
+
+    func updateShopBalance(_ balance: Int) {
+        shopBalanceView?.update(balance: balance)
     }
 
     @available(*, unavailable)
@@ -133,6 +141,10 @@ class LobbyScreenView: UIView {
 
         addSubview(backgroundView)
         addSubview(backButton)
+        if let shopBalanceView {
+            shopBalanceView.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(shopBalanceView)
+        }
         addSubview(titleLabel)
         addSubview(card)
         card.contentView.addSubview(scrollView)
@@ -215,6 +227,33 @@ class LobbyScreenView: UIView {
             ])
             cardTopToHeaderConstraint = card.topAnchor.constraint(
                 equalTo: backButton.bottomAnchor,
+                constant: Theme.Metrics.spacingLarge
+            )
+
+        case .shop:
+            titleLabel.textAlignment = .left
+            if let shopBalanceView {
+                NSLayoutConstraint.activate([
+                    shopBalanceView.centerXAnchor.constraint(equalTo: centerXAnchor),
+                    shopBalanceView.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
+                    shopBalanceView.leadingAnchor.constraint(
+                        greaterThanOrEqualTo: backButton.trailingAnchor,
+                        constant: Theme.Metrics.spacingSmall
+                    ),
+                ])
+            }
+            NSLayoutConstraint.activate([
+                titleLabel.leadingAnchor.constraint(
+                    equalTo: safeAreaLayoutGuide.leadingAnchor,
+                    constant: Theme.Metrics.contentPadding
+                ),
+                titleLabel.topAnchor.constraint(
+                    equalTo: backButton.bottomAnchor,
+                    constant: Theme.Metrics.spacingMedium
+                ),
+            ])
+            cardTopToHeaderConstraint = card.topAnchor.constraint(
+                equalTo: titleLabel.bottomAnchor,
                 constant: Theme.Metrics.spacingLarge
             )
         }

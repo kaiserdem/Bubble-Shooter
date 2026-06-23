@@ -20,7 +20,7 @@ final class CannonStyleListView: LobbyScreenView {
     private let displayedSkins = CannonSkin.shopDisplayOrder
 
     init() {
-        super.init(screenTitle: "Cannon Style")
+        super.init(screenTitle: "Cannon Style", headerLayout: .shop)
         configureContent()
     }
 
@@ -31,6 +31,7 @@ final class CannonStyleListView: LobbyScreenView {
 
     func reloadFromStorage() {
         let state = SkillzProgressionService.shared.state
+        updateShopBalance(state.softCurrency)
         let selected = CosmeticSettings.cannonSkin
 
         for (row, skin) in zip(itemRows, displayedSkins) {
