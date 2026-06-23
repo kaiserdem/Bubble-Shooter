@@ -131,7 +131,7 @@ private final class SettingsToggleRow: UIView {
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: toggle.leadingAnchor, constant: -12),
 
-            toggle.trailingAnchor.constraint(equalTo: trailingAnchor),
+            toggle.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -5),
             toggle.centerYAnchor.constraint(equalTo: centerYAnchor),
             toggle.topAnchor.constraint(equalTo: topAnchor, constant: 4),
             toggle.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
