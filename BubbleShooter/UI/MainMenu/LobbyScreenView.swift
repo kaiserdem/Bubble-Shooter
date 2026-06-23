@@ -8,6 +8,13 @@ import UIKit
 /// Full-screen pre-game surface: lobby wallpaper, back navigation, and a scrollable glass content card.
 class LobbyScreenView: UIView {
 
+    enum HeaderLayout {
+        /// Back on top, title on the next line.
+        case stacked
+        /// Back and title share one horizontal row.
+        case inline
+    }
+
     var onBack: (() -> Void)?
 
     let scrollView = UIScrollView()
@@ -17,8 +24,11 @@ class LobbyScreenView: UIView {
     private let backButton = ArcadeButton(title: "Back", style: .ghost, size: .compact)
     private let titleLabel: ArcadeLabel
     private let card = GlassCardView()
+    private let headerLayout: HeaderLayout
+    private var cardTopToHeaderConstraint: NSLayoutConstraint?
 
-    init(screenTitle: String) {
+    init(screenTitle: String, headerLayout: HeaderLayout = .stacked) {
+        self.headerLayout = headerLayout
         titleLabel = ArcadeLabel(screenTitle, style: .title)
         super.init(frame: .zero)
         configureChrome()
@@ -95,7 +105,8 @@ class LobbyScreenView: UIView {
         isUserInteractionEnabled = false
         translatesAutoresizingMaskIntoConstraints = false
 
-        titleLabel.textAlignment = .left
+        titleLabel.numberOfLines = 1
+        titleLabel.lineBreakMode = .byTruncatingTail
         Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.primary)
 
         backButton.addAction(UIAction { [weak self] _ in
@@ -141,15 +152,10 @@ class LobbyScreenView: UIView {
                 constant: Theme.Metrics.spacingSmall
             ),
 
-            titleLabel.leadingAnchor.constraint(
-                equalTo: safeAreaLayoutGuide.leadingAnchor,
-                constant: Theme.Metrics.contentPadding
-            ),
             titleLabel.trailingAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.trailingAnchor,
                 constant: -Theme.Metrics.contentPadding
             ),
-            titleLabel.topAnchor.constraint(equalTo: backButton.bottomAnchor, constant: Theme.Metrics.spacingMedium),
 
             card.leadingAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.leadingAnchor,
@@ -159,7 +165,6 @@ class LobbyScreenView: UIView {
                 equalTo: safeAreaLayoutGuide.trailingAnchor,
                 constant: -Theme.Metrics.contentPadding
             ),
-            card.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: Theme.Metrics.spacingLarge),
             card.bottomAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.bottomAnchor,
                 constant: -Theme.Metrics.spacingMedium
@@ -176,5 +181,44 @@ class LobbyScreenView: UIView {
             scrollStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             scrollStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
         ])
+
+        applyHeaderLayoutConstraints()
+    }
+
+    private func applyHeaderLayoutConstraints() {
+        switch headerLayout {
+        case .stacked:
+            titleLabel.textAlignment = .left
+            NSLayoutConstraint.activate([
+                titleLabel.leadingAnchor.constraint(
+                    equalTo: safeAreaLayoutGuide.leadingAnchor,
+                    constant: Theme.Metrics.contentPadding
+                ),
+                titleLabel.topAnchor.constraint(
+                    equalTo: backButton.bottomAnchor,
+                    constant: Theme.Metrics.spacingMedium
+                ),
+            ])
+            cardTopToHeaderConstraint = card.topAnchor.constraint(
+                equalTo: titleLabel.bottomAnchor,
+                constant: Theme.Metrics.spacingLarge
+            )
+
+        case .inline:
+            titleLabel.textAlignment = .right
+            NSLayoutConstraint.activate([
+                titleLabel.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
+                titleLabel.leadingAnchor.constraint(
+                    greaterThanOrEqualTo: backButton.trailingAnchor,
+                    constant: Theme.Metrics.spacingSmall
+                ),
+            ])
+            cardTopToHeaderConstraint = card.topAnchor.constraint(
+                equalTo: backButton.bottomAnchor,
+                constant: Theme.Metrics.spacingLarge
+            )
+        }
+
+        cardTopToHeaderConstraint?.isActive = true
     }
 }

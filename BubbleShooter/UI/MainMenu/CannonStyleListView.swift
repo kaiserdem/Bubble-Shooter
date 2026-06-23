@@ -19,7 +19,7 @@ final class CannonStyleListView: LobbyScreenView {
     private let displayedSkins = CannonSkin.shopDisplayOrder
 
     init() {
-        super.init(screenTitle: "Cannon Style")
+        super.init(screenTitle: "Cannon Style", headerLayout: .inline)
         configureContent()
     }
 

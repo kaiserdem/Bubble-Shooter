@@ -152,6 +152,11 @@ private final class ShopCategoryTile: UIControl {
 
         let titleLabel = ArcadeLabel(title, style: .headline)
         titleLabel.textAlignment = .left
+        titleLabel.numberOfLines = 1
+        titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.font = Theme.Typography.headline(18)
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.minimumScaleFactor = 0.85
         titleLabel.isUserInteractionEnabled = false
         Theme.Text.applyHUDLegibility(to: titleLabel, color: Theme.Text.primary)
 
@@ -174,9 +179,14 @@ private final class ShopCategoryTile: UIControl {
         let header = UIStackView(arrangedSubviews: [textStack, chevron])
         header.axis = .horizontal
         header.alignment = .center
-        header.distribution = .equalSpacing
+        header.distribution = .fill
+        header.spacing = Theme.Metrics.spacingSmall
         header.isUserInteractionEnabled = false
         header.translatesAutoresizingMaskIntoConstraints = false
+
+        chevron.setContentHuggingPriority(.required, for: .horizontal)
+        chevron.setContentCompressionResistancePriority(.required, for: .horizontal)
+        textStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
         previewStack.axis = .horizontal
         previewStack.spacing = 4

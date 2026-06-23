@@ -18,7 +18,7 @@ final class BubbleStyleListView: LobbyScreenView {
     private var itemRows: [CosmeticStyleRow] = []
 
     init() {
-        super.init(screenTitle: "Bubble Style")
+        super.init(screenTitle: "Bubble Style", headerLayout: .inline)
         configureContent()
     }
 

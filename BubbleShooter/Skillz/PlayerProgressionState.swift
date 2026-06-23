@@ -9,7 +9,7 @@ import Foundation
 struct PlayerProgressionState: Equatable, Sendable {
 
     static let matchCoinReward = 50
-    static let startingCoins = 100
+    static let startingCoins = 500
 
     var softCurrency: Int
     var ownedBubbleRibbon: Bool
@@ -209,18 +209,18 @@ enum CosmeticShopItem: CaseIterable, Sendable {
 
     var price: Int {
         switch self {
-        case .bubbleRibbon: 400
-        case .bubbleShimmer: 600
-        case .bubblePlanet: 500
-        case .bubbleGlossy: 750
-        case .cannonCopper: 350
-        case .cannonEmerald: 400
-        case .cannonNebula: 450
-        case .cannonSolar: 500
-        case .cannonRuby: 550
-        case .cannonAurora: 600
-        case .cannonCrystal: 700
-        case .cannonGold: 1_000
+        case .bubbleRibbon: 100
+        case .bubbleShimmer: 140
+        case .bubblePlanet: 120
+        case .bubbleGlossy: 180
+        case .cannonCopper: 80
+        case .cannonEmerald: 100
+        case .cannonNebula: 110
+        case .cannonSolar: 120
+        case .cannonRuby: 130
+        case .cannonAurora: 140
+        case .cannonCrystal: 160
+        case .cannonGold: 250
         }
     }
 

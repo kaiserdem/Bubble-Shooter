@@ -38,7 +38,23 @@ post_install do |installer|
   )
   if File.exist?(frameworks_script)
     content = File.read(frameworks_script)
-    unless content.include?('skip_skillz_on_arm64_simulator')
+    broken_recursion = /skip_skillz_on_arm64_simulator\(\) \{\n  if \[\[ "\$\{EFFECTIVE_PLATFORM_NAME\}" == "-iphonesimulator" \]\] && \[\[ "\$\{ARCHS\}" == \*arm64\* \]\]; then\n    echo "note: Skipping Skillz\.framework on arm64 simulator \(MockSkillzService\)"\n    return 0\n  fi\n  skip_skillz_on_arm64_simulator\n\}/
+
+    if content.match?(broken_recursion)
+      content.sub!(
+        broken_recursion,
+        <<~'SH'.strip
+          skip_skillz_on_arm64_simulator() {
+            if [[ "${EFFECTIVE_PLATFORM_NAME}" == "-iphonesimulator" ]] && [[ "${ARCHS}" == *arm64* ]]; then
+              echo "note: Skipping Skillz.framework on arm64 simulator (MockSkillzService)"
+              return 0
+            fi
+            install_framework "${PODS_ROOT}/Skillz/Skillz.framework"
+          }
+        SH
+      )
+      File.write(frameworks_script, content)
+    elsif !content.include?('skip_skillz_on_arm64_simulator')
       skillz_helper = <<~'SH'
 
         skip_skillz_on_arm64_simulator() {
@@ -54,8 +70,8 @@ post_install do |installer|
         "#{skillz_helper}\nif [[ \"$CONFIGURATION\" == \"Debug\" ]]; then\n"
       )
       content.gsub!(
-        'install_framework "${PODS_ROOT}/Skillz/Skillz.framework"',
-        'skip_skillz_on_arm64_simulator'
+        /^  install_framework "\$\{PODS_ROOT\}\/Skillz\/Skillz\.framework"$/,
+        '  skip_skillz_on_arm64_simulator'
       )
       File.write(frameworks_script, content)
     end
