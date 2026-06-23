@@ -9,6 +9,8 @@ Icon
 build/
 DerivedData/
 .derivedData/
+.derivedData*/
+.derivedData-release/
 *.xcuserstate
 *.xccheckout
 *.xcscmblueprint
