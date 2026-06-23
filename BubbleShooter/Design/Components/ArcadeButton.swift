@@ -31,6 +31,8 @@ final class ArcadeButton: UIControl {
     private let glassTintOverlay = UIView()
     private let style: Style
     private let size: Size
+    /// Overrides `Theme.Metrics.compactButtonHorizontalPadding` for this button only.
+    private let contentHorizontalPadding: CGFloat?
 
     private var usesGlassBackground: Bool {
         style == .ghost && size == .compact
@@ -44,9 +46,15 @@ final class ArcadeButton: UIControl {
         }
     }
 
-    init(title: String, style: Style = .primary, size: Size = .regular) {
+    init(
+        title: String,
+        style: Style = .primary,
+        size: Size = .regular,
+        contentHorizontalPadding: CGFloat? = nil
+    ) {
         self.style = style
         self.size = size
+        self.contentHorizontalPadding = contentHorizontalPadding
         super.init(frame: .zero)
         titleLabel.text = title
         configure()
@@ -97,9 +105,13 @@ final class ArcadeButton: UIControl {
             let labelSize = titleLabel.sizeThatFits(
                 CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
             )
-            let width = labelSize.width + Theme.Metrics.compactButtonHorizontalPadding * 2
+            let width = labelSize.width + compactHorizontalPadding * 2
             return CGSize(width: width, height: Theme.Metrics.compactButtonHeight)
         }
+    }
+
+    private var compactHorizontalPadding: CGFloat {
+        contentHorizontalPadding ?? Theme.Metrics.compactButtonHorizontalPadding
     }
 
     private var cornerRadius: CGFloat {
@@ -154,11 +166,11 @@ final class ArcadeButton: UIControl {
                 titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
                 titleLabel.leadingAnchor.constraint(
                     greaterThanOrEqualTo: leadingAnchor,
-                    constant: Theme.Metrics.compactButtonHorizontalPadding
+                    constant: compactHorizontalPadding
                 ),
                 titleLabel.trailingAnchor.constraint(
                     lessThanOrEqualTo: trailingAnchor,
-                    constant: -Theme.Metrics.compactButtonHorizontalPadding
+                    constant: -compactHorizontalPadding
                 ),
             ])
         }

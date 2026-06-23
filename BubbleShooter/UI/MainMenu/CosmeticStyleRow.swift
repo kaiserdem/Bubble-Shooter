@@ -25,7 +25,12 @@ final class CosmeticStyleRow: UIView {
     private let bubblePopOverlay = BubblePopPreviewOverlay()
     private let actionsRow = UIStackView()
     private let actionContainer = UIView()
-    private let equipButton = ArcadeButton(title: "Equip", style: .secondary, size: .compact)
+    private let equipButton = ArcadeButton(
+        title: "Equip",
+        style: .secondary,
+        size: .compact,
+        contentHorizontalPadding: ActionSlotMetrics.shopActionHorizontalPadding
+    )
     private let buyButton = ArcadeButton(title: "Buy", style: .gold, size: .compact)
     private let tryButton = ArcadeButton(title: "Try", style: .violet, size: .compact)
     private let equippedBadge = BadgeView(text: "EQUIPPED", tint: Theme.Accent.primary)
@@ -154,8 +159,9 @@ final class CosmeticStyleRow: UIView {
 
     private enum ActionSlotMetrics {
         static let height = Theme.Metrics.compactButtonHeight
-        /// Fits the wider "Equip" compact label without resizing between states.
-        static let cannonWidth: CGFloat = 84
+        static let shopActionHorizontalPadding: CGFloat = 8
+        /// Fits "Equip", "Buy", and "EQUIPPED" in the cannon row header.
+        static let cannonWidth: CGFloat = 96
     }
 
     private func configureActions() {

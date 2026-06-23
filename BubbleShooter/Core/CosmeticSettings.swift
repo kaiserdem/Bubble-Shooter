@@ -110,6 +110,18 @@ enum CannonSkin: String, CaseIterable, Codable, Sendable {
         case .copper: 14
         }
     }
+
+    /// Shop list: default cannon first, then paid skins from cheapest to most expensive.
+    static var shopDisplayOrder: [CannonSkin] {
+        let paid = allCases
+            .filter { $0 != .standard }
+            .sorted {
+                let leftPrice = CosmeticUnlockPolicy.shopItem(for: $0)?.price ?? .max
+                let rightPrice = CosmeticUnlockPolicy.shopItem(for: $1)?.price ?? .max
+                return leftPrice < rightPrice
+            }
+        return [.standard] + paid
+    }
 }
 
 /// Player cosmetic choices — applied on the next match.

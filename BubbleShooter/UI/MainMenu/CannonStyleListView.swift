@@ -16,6 +16,7 @@ final class CannonStyleListView: LobbyScreenView {
     )
     private let itemsStack = UIStackView()
     private var itemRows: [CosmeticStyleRow] = []
+    private let displayedSkins = CannonSkin.shopDisplayOrder
 
     init() {
         super.init(screenTitle: "Cannon Style")
@@ -31,7 +32,7 @@ final class CannonStyleListView: LobbyScreenView {
         let state = SkillzProgressionService.shared.state
         let selected = CosmeticSettings.cannonSkin
 
-        for (row, skin) in zip(itemRows, CannonSkin.allCases) {
+        for (row, skin) in zip(itemRows, displayedSkins) {
             let isOwned = CosmeticUnlockPolicy.isOwned(skin, progression: state)
             let shopItem = CosmeticUnlockPolicy.shopItem(for: skin)
             row.configure(
@@ -65,7 +66,7 @@ final class CannonStyleListView: LobbyScreenView {
         itemsStack.spacing = Theme.Metrics.spacingMedium
         itemsStack.translatesAutoresizingMaskIntoConstraints = false
 
-        for skin in CannonSkin.allCases {
+        for skin in displayedSkins {
             let row = CosmeticStyleRow(previewLayout: .singleCentered, previewIconSize: 124)
             row.onEquipTapped = { [weak self] in
                 guard CosmeticUnlockPolicy.canEquip(skin) else { return }
