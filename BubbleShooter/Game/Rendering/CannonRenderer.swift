@@ -5,7 +5,7 @@
 
 import SpriteKit
 
-/// Cannon sprite (`gun-1`) and the loaded bubble in the diamond port.
+/// Cannon sprite (`gun-1`…`gun-9`) and the loaded bubble in the diamond port.
 /// Next bubble preview lives in the UIKit HUD (`GameHUDView`).
 final class CannonRenderer: SKNode {
 

@@ -14,7 +14,7 @@ enum SnapResolver {
             let connectionScore: Int
             let distanceToImpact: CGFloat
 
-            static func sortForDisplay(_ lhs: Candidate, _ rhs: Candidate) -> Bool {
+            static nonisolated func sortForDisplay(_ lhs: Candidate, _ rhs: Candidate) -> Bool {
                 if lhs.connectionScore != rhs.connectionScore {
                     return lhs.connectionScore > rhs.connectionScore
                 }

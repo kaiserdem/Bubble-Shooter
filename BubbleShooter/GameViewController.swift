@@ -25,6 +25,7 @@ final class GameViewController: UIViewController {
     private var matchResultsView: MatchResultsView?
     private var activeMatchContext: SkillzMatchContext?
     private var pendingMatchResults: MatchResultsState?
+    private var progressionShopFlow: ShopFlowView?
 
     // MARK: - Lifecycle
 
@@ -60,9 +61,14 @@ extension GameViewController: SkillzGameDelegate {
     }
 
     func skillzWillExit() {
+        teardownProgressionShop()
         teardownMatchUI()
         BackgroundMusicPlayer.shared.playIfEnabled()
         showMainMenuIfNeeded()
+    }
+
+    func progressionRoomWillEnter() {
+        presentProgressionShop()
     }
 
     func preferredSkillzInterfaceOrientation() -> UIInterfaceOrientationMask {
@@ -191,6 +197,8 @@ private extension GameViewController {
     func showMainMenuIfNeeded() {
         guard mainMenuView == nil else { return }
 
+        SkillzProgressionService.shared.refresh { _ in }
+
         let menu = MainMenuContainerView()
         menu.onPlay = {
             #if USE_SKILLZ_SDK
@@ -214,6 +222,48 @@ private extension GameViewController {
         mainMenuView?.removeFromSuperview()
         mainMenuView = nil
     }
+
+    func presentProgressionShop() {
+        guard progressionShopFlow == nil else { return }
+
+        let shop = ShopFlowView()
+        shop.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(shop)
+        NSLayoutConstraint.activate([
+            shop.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            shop.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            shop.topAnchor.constraint(equalTo: view.topAnchor),
+            shop.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+        progressionShopFlow = shop
+
+        shop.onBack = { [weak self] in
+            self?.dismissProgressionShop()
+        }
+
+        shop.onPurchaseFailed = { message in
+            #if DEBUG
+            print("[Shop] Purchase failed: \(message)")
+            #endif
+        }
+
+        shop.present()
+    }
+
+    func dismissProgressionShop() {
+        progressionShopFlow?.dismiss { [weak self] in
+            self?.progressionShopFlow?.removeFromSuperview()
+            self?.progressionShopFlow = nil
+            #if USE_SKILLZ_SDK
+            SkillzSDKBridge.returnToSkillz {}
+            #endif
+        }
+    }
+
+    func teardownProgressionShop() {
+        progressionShopFlow?.removeFromSuperview()
+        progressionShopFlow = nil
+    }
 }
 
 extension GameViewController: GameSceneHUDDelegate {
@@ -230,6 +280,11 @@ extension GameViewController: GameSceneHUDDelegate {
         #if USE_SKILLZ_SDK
         SkillzSDKBridge.updateCurrentScore(results.finalScore)
         #endif
-        matchResultsView?.present(with: results)
+
+        SkillzProgressionService.shared.grantMatchReward { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.matchResultsView?.present(with: results)
+            }
+        }
     }
 }

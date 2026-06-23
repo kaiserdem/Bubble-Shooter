@@ -17,10 +17,12 @@ enum AppSkillzEnvironment: String {
 protocol SkillzGameDelegate: AnyObject {
     func tournamentWillBegin(matchContext: SkillzMatchContext)
     func skillzWillExit()
+    func progressionRoomWillEnter()
     func preferredSkillzInterfaceOrientation() -> UIInterfaceOrientationMask
 }
 
 extension SkillzGameDelegate {
+    func progressionRoomWillEnter() {}
     func preferredSkillzInterfaceOrientation() -> UIInterfaceOrientationMask {
         .portrait
     }

@@ -43,6 +43,10 @@ extension SkillzAppCoordinator: SkillzDelegate {
         gameDelegate?.skillzWillExit()
     }
 
+    func onProgressionRoomEnter() {
+        gameDelegate?.progressionRoomWillEnter()
+    }
+
     func preferredSkillzInterfaceOrientation() -> SkillzOrientation {
         gameDelegate?.preferredSkillzInterfaceOrientation() == .portrait
             ? SkillzOrientation(rawValue: 0)!

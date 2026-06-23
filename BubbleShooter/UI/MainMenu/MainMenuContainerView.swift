@@ -13,7 +13,7 @@ final class MainMenuContainerView: UIView {
     private let mainMenu = MainMenuView()
     private let howToPlay = HowToPlayView()
     private let settings = SettingsView()
-    private let styles = StylesView()
+    private let shopFlow = ShopFlowView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -30,7 +30,7 @@ final class MainMenuContainerView: UIView {
     private func configure() {
         translatesAutoresizingMaskIntoConstraints = false
 
-        for child in [mainMenu, howToPlay, settings, styles] {
+        for child in [mainMenu, howToPlay, settings, shopFlow] {
             child.translatesAutoresizingMaskIntoConstraints = false
             addSubview(child)
             NSLayoutConstraint.activate([
@@ -55,10 +55,10 @@ final class MainMenuContainerView: UIView {
             self?.openScreen(self?.settings)
         }
 
-        mainMenu.onStyles = { [weak self] in
+        mainMenu.onShop = { [weak self] in
             guard let self else { return }
-            self.styles.reloadFromStorage()
-            self.openScreen(self.styles)
+            self.bringSubviewToFront(self.shopFlow)
+            self.shopFlow.present()
         }
 
         howToPlay.onBack = { [weak self] in
@@ -69,8 +69,16 @@ final class MainMenuContainerView: UIView {
             self?.closeScreen(self?.settings, returnTo: self?.mainMenu)
         }
 
-        styles.onBack = { [weak self] in
-            self?.closeScreen(self?.styles, returnTo: self?.mainMenu)
+        shopFlow.onBack = { [weak self] in
+            self?.shopFlow.dismiss {
+                self?.bringSubviewToFront(self?.mainMenu ?? UIView())
+            }
+        }
+
+        shopFlow.onPurchaseFailed = { message in
+            #if DEBUG
+            print("[Shop] Purchase failed: \(message)")
+            #endif
         }
     }
 

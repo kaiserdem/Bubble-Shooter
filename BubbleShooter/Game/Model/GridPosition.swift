@@ -6,13 +6,25 @@
 import Foundation
 
 /// Odd-row horizontal offset hex cell on a staggered bubble grid.
-struct GridPosition: Hashable, Codable, Sendable, Comparable {
+struct GridPosition: Codable, Sendable, Comparable {
 
     let row: Int
     let col: Int
 
-    static func < (lhs: GridPosition, rhs: GridPosition) -> Bool {
+    nonisolated static func < (lhs: GridPosition, rhs: GridPosition) -> Bool {
         if lhs.row != rhs.row { return lhs.row < rhs.row }
         return lhs.col < rhs.col
+    }
+}
+
+extension GridPosition: Hashable {
+
+    nonisolated static func == (lhs: GridPosition, rhs: GridPosition) -> Bool {
+        lhs.row == rhs.row && lhs.col == rhs.col
+    }
+
+    nonisolated func hash(into hasher: inout Hasher) {
+        hasher.combine(row)
+        hasher.combine(col)
     }
 }

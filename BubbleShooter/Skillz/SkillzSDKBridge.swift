@@ -38,6 +38,10 @@ enum SkillzSDKBridge {
         Skillz.skillzInstance().launch()
     }
 
+    static func returnToSkillz(completion: @escaping () -> Void) {
+        Skillz.skillzInstance().returnToSkillz(completion: completion)
+    }
+
     static func matchContext(
         from gameParameters: [AnyHashable: Any]?,
         matchInfo: SKZMatchInfo

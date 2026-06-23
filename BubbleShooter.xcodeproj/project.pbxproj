@@ -310,7 +310,6 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[sdk=iphoneos*]" = "DEBUG USE_SKILLZ_SDK $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = BubbleShooter/Skillz/SkillzBridgingHeaderSimulator.h;
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=iphoneos*]" = BubbleShooter/Skillz/SkillzBridgingHeader.h;
@@ -359,7 +358,6 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "USE_SKILLZ_SDK $(inherited)";
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[sdk=iphonesimulator*]" = "$(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = BubbleShooter/Skillz/SkillzBridgingHeaderSimulator.h;
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=iphoneos*]" = BubbleShooter/Skillz/SkillzBridgingHeader.h;

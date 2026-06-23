@@ -167,7 +167,6 @@ private extension GameScene {
               let layout = hexLayout,
               let grid,
               let gameplayParameters,
-              let shotQueue,
               let ray = shotRay(toward: scenePoint) else { return }
 
         let configuration = gameplayParameters.gridConfiguration
@@ -177,8 +176,7 @@ private extension GameScene {
             grid: grid,
             configuration: configuration
         )
-        let previewPath = path
-        cannonPivot?.updateAimGuide(path: previewPath, in: self)
+        cannonPivot?.updateAimGuide(path: path, in: self)
     }
 
     func fireShot(toward scenePoint: CGPoint) {
@@ -287,9 +285,6 @@ private extension GameScene {
         configuration: GridConfiguration,
         parameters: MatchGameplayParameters
     ) {
-        var lastPopCount: Int?
-        var lastDropCount: Int?
-
         if let group = MatchFinder.matchingGroup(including: position, in: grid) {
             #if DEBUG
             GridDebugPrinter.logMatchResult(
@@ -300,7 +295,6 @@ private extension GameScene {
             )
             #endif
 
-            lastPopCount = group.count
             matchScore.addPop(bubbleCount: group.count)
             let popSpecs = popSpecs(
                 for: group,
@@ -332,7 +326,6 @@ private extension GameScene {
 
         let floating = ConnectivityChecker.floatingPositions(in: grid)
         if !floating.isEmpty {
-            lastDropCount = floating.count
             matchScore.addDrop(bubbleCount: floating.count)
             let dropSpecs = popSpecs(
                 for: floating,
@@ -383,7 +376,7 @@ private extension GameScene {
         let specs = popSpecs(for: positions, grid: grid, layout: layout, configuration: configuration)
 
         for gridPosition in positions {
-            try? grid.remove(at: gridPosition)
+            _ = try? grid.remove(at: gridPosition)
         }
 
         guard !specs.isEmpty else { return }
