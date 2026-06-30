@@ -38,9 +38,7 @@ final class AchievementUnlockedOverlayView: ModalCardOverlayView {
             detailLabel.text = definition.title
         }
 
-        rewardIconView.image = UIImage(
-            named: AchievementRewardArt.previewIconName(for: definition)
-        )
+        rewardIconView.image = UIImage(named: AchievementRewardArt.previewIconName(for: definition))
         rewardLabel.text = rewardDescription(for: definition.reward)
     }
 

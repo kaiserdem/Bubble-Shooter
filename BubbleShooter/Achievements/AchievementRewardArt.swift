@@ -12,6 +12,16 @@ enum AchievementRewardArt {
         guard case .coins(let amount) = definition.reward else {
             return Theme.Asset.Shop.coin1
         }
+
+        switch definition.id {
+        case .firstSteps:
+            return Theme.Asset.Shop.coin4
+        case .regularPlayer:
+            return Theme.Asset.Shop.coin5
+        default:
+            break
+        }
+
         switch definition.tier {
         case .bronze:
             return Theme.Asset.Shop.coin1
