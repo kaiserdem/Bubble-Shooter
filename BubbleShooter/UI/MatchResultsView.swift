@@ -231,9 +231,7 @@ private final class BreakdownRow: UIView {
     }
 
     func setValue(_ value: Int, formatter: NumberFormatter) {
-        let prefix = value >= 0 ? "+" : ""
-        let formatted = formatter.string(from: NSNumber(value: value)) ?? "\(value)"
-        valueLabel.text = "\(prefix)\(formatted)"
+        valueLabel.text = formatter.string(from: NSNumber(value: value)) ?? "\(value)"
         valueLabel.textColor = value > 0 ? Theme.Accent.secondary : Theme.Text.muted
     }
 }

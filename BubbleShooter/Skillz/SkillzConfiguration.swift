@@ -7,5 +7,5 @@ import Foundation
 
 enum SkillzConfiguration {
     static let gameID = "102977"
-    static let environment: AppSkillzEnvironment = .sandbox
+    static let environment: AppSkillzEnvironment = .production
 }

@@ -281,10 +281,12 @@ Skillz викликає `tournamentWillBegin` — ви презентуєте Sp
 
 ## 9. Production
 
-1. `SkillzConfiguration.environment` → `.production`
-2. Зібрати Archive → `.ipa`
-3. Upload у Skillz Console → Deployments
-4. Sandbox-турніри не потребують upload для щоденного тесту
+**Статус:** `SkillzConfiguration.environment` уже `.production` (Game ID `102977`).
+
+1. Зібрати Archive → `.ipa` (відкривати `.xcworkspace`; вимкнути Manage Version and Build Number)
+2. Upload у Skillz Console → Deployments (той самий бінарник, що піде в Store)
+3. Встановити exported `.ipa` на реальний iPhone і пройти smoke test
+4. Sandbox більше не використовується для daily device builds; симулятор як і раніше на `MockSkillzService`
 
 ---
 

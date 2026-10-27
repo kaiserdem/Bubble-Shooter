@@ -6,7 +6,7 @@
 import CoreGraphics
 import SpriteKit
 
-/// "+N" label that appears after pop/drop FX, floats up, and fades out.
+/// Points label that appears after pop/drop FX, floats up, and fades out.
 enum ScoreFloater {
 
     enum Kind {
@@ -51,7 +51,7 @@ enum ScoreFloater {
         let delay = kind.effectCompletionDelay(bubbleCount: bubbleCount)
 
         let label = SKLabelNode(fontNamed: Theme.Typography.skTitle())
-        label.text = "+\(points)"
+        label.text = "\(points)"
         label.fontSize = 32
         label.fontColor = kind.textColor
         label.verticalAlignmentMode = .center
