@@ -4,12 +4,16 @@
 .LSOverride
 Icon
 ._*
+.Spotlight-V100
+.Trashes
 
-# Xcode
+# Xcode / local build caches
 build/
+Build/
 DerivedData/
 .derivedData/
 .derivedData*/
+.derivedData-device/
 .derivedData-release/
 *.xcuserstate
 *.xccheckout
@@ -23,20 +27,27 @@ DerivedData/
 *~.nib
 *.app
 Timeline/
+*.mode1v3
+*.mode2v3
+*.pbxuser
+!default.pbxuser
+*.perspectivev3
+!default.perspectivev3
 
 # Xcode user-specific data
 xcuserdata/
 *.xcuserdatad/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcshareddata/swiftpm/configuration/
 
 # Swift Package Manager
 .build/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-# Keep Package.resolved ignored only for libraries; uncomment to commit for app SPM deps.
 
-# CocoaPods — Pods/ is regenerated; Podfile.lock should be committed for apps.
+# CocoaPods — Pods/ is regenerated; keep Podfile.lock committed
 Pods/
 
 # Carthage
@@ -48,20 +59,23 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-# Skillz SDK (додайте framework локально, не комітьте бінарники)
+# Skillz SDK binaries (install locally; do not commit)
 Vendor/Skillz/
 Skillz.framework/
 Skillz.xcframework/
 
-# Secrets / env
+# Secrets / signing / env
 .env
 .env.*
 *.p12
 *.mobileprovision
+*.pem
+AuthKey_*.p8
 
-# Cursor / IDE (локальний кеш, не проєктні правила)
+# Cursor / IDE local caches (keep rules/specs/docs)
 .cursor/output/
 .cursor/cache/
+.cursor/plans/
 
 # Accio
 Dependencies/
@@ -69,3 +83,8 @@ Dependencies/
 
 # Code Injection
 iOSInjectionProject/
+
+# Archives / exports
+*.xcarchive
+*.zip
+!**/Assets.xcassets/**/*.png
