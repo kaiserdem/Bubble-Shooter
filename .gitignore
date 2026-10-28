@@ -59,10 +59,12 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-# Skillz SDK binaries (install locally; do not commit)
-Vendor/Skillz/
+# Skillz.framework comes from CocoaPods (Pods/). Keep GeoComply xcframeworks in git.
 Skillz.framework/
 Skillz.xcframework/
+Vendor/Skillz/*
+!Vendor/Skillz/GeocomplySDKs/
+!Vendor/Skillz/GeocomplySDKs/**
 
 # Secrets / signing / env
 .env
